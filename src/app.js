@@ -1,18 +1,19 @@
-const express = require("express");
-const dotenv = require("dotenv");
-const userRoutes = require("./routes/userRoutes");
-const { connectDB } = require("./config/db"); // Desestructuramos para obtener connectDB
-
-dotenv.config(); // Cargar las variables de entorno
+import express from "express";
+import userRoutes from "./routes/userRoutes.js";
+import { connectDB } from "./config/db.js";
 
 const app = express();
 
-connectDB(); // Conectar a la base de datos PostgreSQL
+// Conectar a la base de datos
+connectDB();
 
-app.use(express.json()); // Para parsear los cuerpos JSON
-app.use("/users", userRoutes); // Rutas de usuarios
+// Rutas
+app.use(express.json());
+app.use("/users", userRoutes);
 
+// Iniciar el servidor
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+    // Necesario para informar al desarrollador sobre la URL del servidor durante el desarrollo y las pruebas
+    console.log(`Servidor corriendo en http://localhost:${PORT}`); // skipcq: JS-0002
 });

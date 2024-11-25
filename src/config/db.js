@@ -1,20 +1,20 @@
-const { Client } = require("pg");
-const dotenv = require("dotenv");
+import pkg from "pg";
+const { Client } = pkg;
+import { config } from "dotenv";
 
-dotenv.config();
+config();
 
 const client = new Client({
-    connectionString: process.env.DB_URI, // Asegúrate de que esta variable esté definida en .env
+    connectionString: process.env.DB_URI,
 });
 
-const connectDB = async () => {
+export const connectDB = async () => {
     try {
         await client.connect();
-        console.log("Connected to PostgreSQL");
-    } catch (err) {
-        console.error("Connection error", err.stack);
-        process.exit(1); // Si hay error, salimos del proceso
+    } catch (error) {
+        console.error("Error al conectar a PostgreSQL:", error.message);
+        throw error;
     }
 };
 
-module.exports = { client, connectDB }; // Exportamos tanto el cliente como la función
+export { client };

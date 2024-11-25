@@ -1,8 +1,12 @@
-const express = require("express");
+import express from "express";
+import { createUserHandler, updateUserHandler, getAllUsersHandler, getUserEmailHandler, getUserHandler } from "../controls/userControl.js";
+
 const router = express.Router();
-const userController = require("../controls/userControl");
 
-router.get("/", userController.getAllUsers); // Ruta para obtener usuarios
-router.post("/", userController.createUser); // Ruta para crear un usuario
+router.post("/", createUserHandler);
+router.put("/:idUsuario", updateUserHandler);
+router.get("/:usuario", getUserHandler);
+router.get("/email/:correo", getUserEmailHandler);
+router.get("/", getAllUsersHandler);
 
-module.exports = router;
+export default router;
