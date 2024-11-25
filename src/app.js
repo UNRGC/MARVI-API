@@ -1,7 +1,7 @@
 const express = require("express");
 const dotenv = require("dotenv");
 const userRoutes = require("./routes/userRoutes");
-const connectDB = require("./config/db"); // Conectar a la base de datos
+const { connectDB } = require("./config/db"); // Desestructuramos para obtener connectDB
 
 dotenv.config(); // Cargar las variables de entorno
 
