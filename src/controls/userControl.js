@@ -1,54 +1,24 @@
 import { createUser, updateUser, getUser, getUserEmail, getAllUsers, deleteUser } from "../models/userModel.js";
 import { createLog } from "../models/logModel.js";
-import encryptPassword from "../utils/encryptPassword.js";
 import { config } from "dotenv";
+import { validateUser } from "../middlewares/credentialsMiddleware.js";
+import encryptPassword from "../utils/encryptPassword.js";
 
 // Cargar las variables de entorno desde el archivo .env
 config();
-
-// Función para validar las credenciales de usuario
-const validateCredentials = async (req, res, id_usuario = null) => {
-    // Obtener los datos del cuerpo de la solicitud
-    const { usuario, correo } = req.body;
-    /// Obtener todos los usuarios de la base de datos
-    const usuarios = await getAllUsers();
-
-    // Convertir id_usuario a número si no es nulo
-    const id_usuarioNum = id_usuario !== null ? Number(id_usuario) : null;
-
-    // Verificar si el nombre de usuario ya existe y no es el mismo usuario que se está actualizando
-    const usuarioExists = usuarios.find((user) => user.usuario === usuario && user.id_usuario !== id_usuarioNum);
-    // Verificar si el correo ya existe y no es el mismo usuario que se está actualizando
-    const correoExists = usuarios.find((user) => user.correo === correo && user.id_usuario !== id_usuarioNum);
-
-    // Si el nombre de usuario ya existe, responder con un error 400
-    if (usuarioExists) {
-        res.status(400).json({ message: "El usuario ya existe." });
-        return true;
-    }
-
-    // Si el correo ya existe, responder con un error 400
-    if (correoExists) {
-        res.status(400).json({ message: "El correo ya existe." });
-        return true;
-    }
-
-    // Si no hay conflictos, retornar false
-    return false;
-};
 
 export const createAdminHandler = async (req, res) => {
     try {
         // Asignar el usuario administrador
         req.body = JSON.parse(process.env.ADMIN);
         // Obtener los datos del cuerpo de la solicitud
-        const { usuario, nombre, primer_apellido, segundo_apellido, correo, telefono, contrasena, rol } = req.body;
+        const { usuario, nombre, primer_apellido, segundo_apellido, correo, contrasena, rol } = req.body;
         // Validar las credenciales del nuevo usuario
-        if (await validateCredentials(req, res)) return;
+        if (await validateUser(req, res)) return;
         // Encriptar la contraseña del nuevo usuario
         const hashedPassword = await encryptPassword(contrasena);
         // Crear el nuevo usuario en la base de datos
-        const newUser = await createUser(usuario, nombre, primer_apellido, segundo_apellido, correo, telefono, hashedPassword, rol);
+        const newUser = await createUser(usuario, nombre, primer_apellido, segundo_apellido, correo, null, hashedPassword, null, rol);
         // Responder con el nuevo usuario creado
         res.status(201).json(newUser);
     } catch (err) {
@@ -61,7 +31,7 @@ export const createAdminHandler = async (req, res) => {
 // Controlador para crear un usuario
 export const createUserHandler = async (req, res) => {
     // Obtener los datos del cuerpo de la solicitud
-    const { usuario, nombre, primer_apellido, segundo_apellido, correo, telefono, contrasena, rol } = req.body;
+    const { usuario, nombre, primer_apellido, segundo_apellido, correo, telefono, contrasena, foto_src, rol } = req.body;
 
     // Verificar si el usuario autenticado tiene el rol de "Administrador"
     if (req.user.rol !== "Administrador") {
@@ -69,11 +39,11 @@ export const createUserHandler = async (req, res) => {
     } else {
         try {
             // Validar las credenciales del nuevo usuario
-            if (await validateCredentials(req, res)) return;
+            if (await validateUser(req, res)) return;
             // Encriptar la contraseña del nuevo usuario
             const hashedPassword = await encryptPassword(contrasena);
             // Crear el nuevo usuario en la base de datos
-            const newUser = await createUser(usuario, nombre, primer_apellido, segundo_apellido, correo, telefono, hashedPassword, rol);
+            const newUser = await createUser(usuario, nombre, primer_apellido, segundo_apellido, correo, telefono, hashedPassword, foto_src, rol);
             // Crear un registro de log para la creación del usuario
             await createLog(req.user.usuario, `Usuario creado: ${usuario}`);
             // Responder con el nuevo usuario creado
@@ -91,17 +61,17 @@ export const updateUserHandler = async (req, res) => {
     // Obtener el ID del usuario de los parámetros de la solicitud
     const { id_usuario } = req.params;
     // Obtener los datos del cuerpo de la solicitud
-    const { usuario, nombre, primer_apellido, segundo_apellido, correo, telefono, contrasena, rol } = req.body;
+    const { usuario, nombre, primer_apellido, segundo_apellido, correo, telefono, contrasena, foto_src, rol } = req.body;
 
     try {
         // Validar las credenciales del usuario que se está actualizando
-        if (await validateCredentials(req, res, id_usuario)) return;
+        if (await validateUser(req, res, id_usuario)) return;
 
         // Encriptar la nueva contraseña del usuario
         const hashedPassword = await encryptPassword(contrasena);
 
         // Actualizar el usuario en la base de datos
-        const updatedUser = await updateUser(id_usuario, usuario, nombre, primer_apellido, segundo_apellido, correo, telefono, hashedPassword, rol);
+        const updatedUser = await updateUser(id_usuario, usuario, nombre, primer_apellido, segundo_apellido, correo, telefono, hashedPassword, foto_src, rol);
 
         // Crear un registro de log para la actualización del usuario
         await createLog(req.user.usuario, `Usuario actualizado: ${usuario}`);

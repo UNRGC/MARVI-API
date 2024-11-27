@@ -13,6 +13,16 @@ connectDB();
 // Configurar Express para que pueda parsear JSON
 app.use(express.json());
 
+// Middleware para manejar errores de JSON mal formados
+app.use((err, req, res, next) => {
+    if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
+        console.error("Error de JSON mal formado:", err.message);
+        res.status(400).json({ message: "JSON mal formado" });
+        return;
+    }
+    next();
+});
+
 // Rutas
 app.use("/logs", logRoutes);
 app.use("/login", authRoutes);

@@ -1,10 +1,10 @@
 import { client } from "../config/db.js";
 
 // Función para crear un usuario
-export const createUser = async (usuario, nombre, primer_apellido, segundo_apellido, correo, telefono, contrasena, rol) => {
+export const createUser = async (usuario, nombre, primer_apellido, segundo_apellido, correo, telefono, contrasena, foto_src, rol) => {
     try {
         // Insertar un nuevo usuario en la base de datos
-        const res = await client.query("INSERT INTO usuarios (usuario, nombre, primer_apellido, segundo_apellido, correo, telefono, contrasena, rol) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *", [usuario, nombre, primer_apellido, segundo_apellido, correo, telefono, contrasena, rol]);
+        const res = await client.query("INSERT INTO usuarios (usuario, nombre, primer_apellido, segundo_apellido, correo, telefono, contrasena, foto_src, rol) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *", [usuario, nombre, primer_apellido, segundo_apellido, correo, telefono, contrasena, foto_src, rol]);
         // Retornar el usuario creado
         return res.rows[0];
     } catch (err) {
@@ -15,10 +15,10 @@ export const createUser = async (usuario, nombre, primer_apellido, segundo_apell
 };
 
 // Función para obtener un usuario por id
-export const updateUser = async (id_usuario, usuario, nombre, primer_apellido, segundo_apellido, correo, telefono, contrasena, rol) => {
+export const updateUser = async (id_usuario, usuario, nombre, primer_apellido, segundo_apellido, correo, telefono, contrasena, foto_src, rol) => {
     try {
         // Actualizar un usuario en la base de datos
-        const res = await client.query("UPDATE usuarios SET usuario = $2, nombre = $3, primer_apellido = $4, segundo_apellido = $5, correo = $6, telefono = $7, contrasena = $8, rol = $9 WHERE id_usuario = $1 RETURNING *", [id_usuario, usuario, nombre, primer_apellido, segundo_apellido, correo, telefono, contrasena, rol]);
+        const res = await client.query("UPDATE usuarios SET usuario = $2, nombre = $3, primer_apellido = $4, segundo_apellido = $5, correo = $6, telefono = $7, contrasena = $8, foto_src = $9, rol = $10 WHERE id_usuario = $1 RETURNING *", [id_usuario, usuario, nombre, primer_apellido, segundo_apellido, correo, telefono, contrasena, foto_src, rol]);
         // Retornar el usuario actualizado
         return res.rows[0];
     } catch (err) {

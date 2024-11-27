@@ -8,7 +8,7 @@ config();
 const JWT_SECRET = process.env.JWT_SECRET;
 
 // Middleware para autenticar el token
-export const authenticateToken = (req, res, next) => {
+const authenticateToken = (req, res, next) => {
     // Obtener el encabezado de autorización de la solicitud
     const authHeader = req.headers.authorization;
 
@@ -35,3 +35,6 @@ export const authenticateToken = (req, res, next) => {
         res.status(403).json({ message: "Token inválido o expirado" });
     }
 };
+
+// Exportar el middleware
+export default authenticateToken;
