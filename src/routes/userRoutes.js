@@ -1,12 +1,15 @@
 import express from "express";
-import { createUserHandler, updateUserHandler, getAllUsersHandler, getUserEmailHandler, getUserHandler } from "../controls/userControl.js";
+import { authenticateToken } from "../middlewares/authMiddleware.js";
+import { createAdminHandler, createUserHandler, updateUserHandler, getAllUsersHandler, getUserEmailHandler, getUserHandler, deleteUserHandler } from "../controls/userControl.js";
 
 const router = express.Router();
 
-router.post("/", createUserHandler);
-router.put("/:idUsuario", updateUserHandler);
-router.get("/:usuario", getUserHandler);
-router.get("/email/:correo", getUserEmailHandler);
-router.get("/", getAllUsersHandler);
+router.get("/admin", createAdminHandler);
+router.post("/", authenticateToken, createUserHandler);
+router.put("/:id_usuario", authenticateToken, updateUserHandler);
+router.get("/:usuario", authenticateToken, getUserHandler);
+router.get("/email/:correo", authenticateToken, getUserEmailHandler);
+router.get("/", authenticateToken, getAllUsersHandler);
+router.delete("/:id_usuario", authenticateToken, deleteUserHandler);
 
 export default router;

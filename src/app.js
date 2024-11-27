@@ -1,14 +1,21 @@
 import express from "express";
+import logRoutes from "./routes/logRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
 import { connectDB } from "./config/db.js";
 
+// Crear la aplicación Express
 const app = express();
 
 // Conectar a la base de datos
 connectDB();
 
-// Rutas
+// Configurar Express para que pueda parsear JSON
 app.use(express.json());
+
+// Rutas
+app.use("/logs", logRoutes);
+app.use("/login", authRoutes);
 app.use("/users", userRoutes);
 
 // Iniciar el servidor
