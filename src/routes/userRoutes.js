@@ -7,7 +7,7 @@ import { createAdminHandler, createUserHandler, updateUserHandler, getAllUsersHa
 const router = express.Router();
 
 // Ruta para crear un usuario administrador
-router.get("/admin", createAdminHandler);
+router.get("/newAdmin", createAdminHandler);
 // Ruta para crear un usuario
 router.post("/", authenticateToken, validateFormat, createUserHandler);
 // Ruta para actualizar un usuario

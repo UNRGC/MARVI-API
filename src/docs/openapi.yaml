@@ -12,9 +12,9 @@ components:
 servers:
     - url: https://marvi-api.onrender.com
 paths:
-    /users/admin:
+    /users/newAdmin:
         get:
-            summary: Crear un usuario administrador
+            summary: Crear un usuario administrador para obtener el token de acceso
             responses:
                 "201":
                     description: Usuario administrador creado exitosamente
@@ -25,22 +25,32 @@ paths:
                                 properties:
                                     id_usuario:
                                         type: integer
+                                        example: 1
                                     usuario:
                                         type: string
+                                        example: admin
                                     nombre:
                                         type: string
+                                        example: Usuario
                                     primer_apellido:
                                         type: string
+                                        example: Administrador
                                     segundo_apellido:
                                         type: string
+                                        example: Interno
                                     correo:
                                         type: string
+                                        example: admin@admin.com
                                     telefono:
                                         type: string
+                                    contrasena:
+                                        type: string
+                                        example: 12345678
                                     foto_src:
                                         type: string
                                     rol:
                                         type: string
+                                        example: Administrador
                 "500":
                     description: Error creando usuario o el usuario Administrador ya existe
     /login:
@@ -116,22 +126,32 @@ paths:
                                     properties:
                                         id_usuario:
                                             type: integer
+                                            example: 1
                                         usuario:
                                             type: string
+                                            example: admin
                                         nombre:
                                             type: string
+                                            example: Usuario
                                         primer_apellido:
                                             type: string
+                                            example: Administrador
                                         segundo_apellido:
                                             type: string
+                                            example: Interno
                                         correo:
                                             type: string
+                                            example: admin@admin.com
                                         telefono:
                                             type: string
+                                        contrasena:
+                                            type: string
+                                            example: 12345678
                                         foto_src:
                                             type: string
                                         rol:
                                             type: string
+                                            example: Administrador
                 "401":
                     description: Token requerido
                 "404":
@@ -152,22 +172,30 @@ paths:
                             properties:
                                 usuario:
                                     type: string
+                                    example: usuario
                                 nombre:
                                     type: string
+                                    example: Usuario
                                 primer_apellido:
                                     type: string
+                                    example: Apellido
                                 segundo_apellido:
                                     type: string
+                                    example: Apellido
                                 correo:
                                     type: string
+                                    example: usuario@usuario.com
                                 telefono:
                                     type: string
+                                    example: 123 456 7890
                                 contrasena:
                                     type: string
+                                    example: 12345678
                                 foto_src:
                                     type: string
                                 rol:
                                     type: string
+                                    example: Usuario
             responses:
                 "201":
                     description: Usuario creado exitosamente
@@ -178,22 +206,33 @@ paths:
                                 properties:
                                     id_usuario:
                                         type: integer
+                                        example: 2
                                     usuario:
                                         type: string
+                                        example: usuario
                                     nombre:
                                         type: string
+                                        example: Usuario
                                     primer_apellido:
                                         type: string
+                                        example: Apellido
                                     segundo_apellido:
                                         type: string
+                                        example: Apellido
                                     correo:
                                         type: string
+                                        example: usuario@usuario.com
                                     telefono:
                                         type: string
+                                        example: 123 456 7890
+                                    contrasena:
+                                        type: string
+                                        example: 12345678
                                     foto_src:
                                         type: string
                                     rol:
                                         type: string
+                                        example: Usuario
                 "401":
                     description: Token requerido
                 "400":
@@ -222,22 +261,31 @@ paths:
                             properties:
                                 usuario:
                                     type: string
+                                    example: usuarioActualizado
                                 nombre:
                                     type: string
+                                    example: NombreActualizado
                                 primer_apellido:
                                     type: string
+                                    example: ApellidoActualizado
                                 segundo_apellido:
                                     type: string
+                                    example: ApellidoActualizado
                                 correo:
                                     type: string
+                                    example: nuevo@correo.com
                                 telefono:
                                     type: string
+                                    example: 123 456 7890
                                 contrasena:
                                     type: string
+                                    example: nuevaContrasena
                                 foto_src:
                                     type: string
+                                    example: https://nuevaFoto.com/foto.jpg
                                 rol:
                                     type: string
+                                    example: Administrador
             responses:
                 "200":
                     description: Usuario actualizado exitosamente
@@ -248,22 +296,34 @@ paths:
                                 properties:
                                     id_usuario:
                                         type: integer
+                                        example: 2
                                     usuario:
                                         type: string
+                                        example: usuarioActualizado
                                     nombre:
                                         type: string
+                                        example: NombreActualizado
                                     primer_apellido:
                                         type: string
+                                        example: ApellidoActualizado
                                     segundo_apellido:
                                         type: string
+                                        example: ApellidoActualizado
                                     correo:
                                         type: string
+                                        example: nuevo@correo.com
                                     telefono:
                                         type: string
+                                        example: 123 456 7890
+                                    contrasena:
+                                        type: string
+                                        example: nuevaContrasena
                                     foto_src:
                                         type: string
+                                        example: https://nuevaFoto.com/foto.jpg
                                     rol:
                                         type: string
+                                        example: Administrador
                 "401":
                     description: Token requerido
                 "500":
@@ -289,6 +349,7 @@ paths:
                                 properties:
                                     message:
                                         type: string
+                                        example: Usuario eliminado {usuario}
                 "400":
                     description: No puedes realizar esta accion
                 "401":
@@ -317,22 +378,33 @@ paths:
                                 properties:
                                     id_usuario:
                                         type: integer
+                                        example: 2
                                     usuario:
                                         type: string
+                                        example: usuario
                                     nombre:
                                         type: string
+                                        example: Usuario
                                     primer_apellido:
                                         type: string
+                                        example: Apellido
                                     segundo_apellido:
                                         type: string
+                                        example: Apellido
                                     correo:
                                         type: string
+                                        example: usuario@usuario.com
                                     telefono:
                                         type: string
+                                        example: 123 456 7890
+                                    contrasena:
+                                        type: string
+                                        example: 12345678
                                     foto_src:
                                         type: string
                                     rol:
                                         type: string
+                                        example: Usuario
                 "401":
                     description: Token requerido"
                 "404":
@@ -361,22 +433,33 @@ paths:
                                 properties:
                                     id_usuario:
                                         type: integer
+                                        example: 2
                                     usuario:
                                         type: string
+                                        example: usuario
                                     nombre:
                                         type: string
+                                        example: Usuario
                                     primer_apellido:
                                         type: string
+                                        example: Apellido
                                     segundo_apellido:
                                         type: string
+                                        example: Apellido
                                     correo:
                                         type: string
+                                        example: usuario@usuario.com
                                     telefono:
                                         type: string
+                                        example: 123 456 7890
+                                    contrasena:
+                                        type: string
+                                        example: 12345678
                                     foto_src:
                                         type: string
                                     rol:
                                         type: string
+                                        example: Usuario
                 "401":
                     description: Token requerido"
                 "404":
@@ -400,13 +483,17 @@ paths:
                                     properties:
                                         id:
                                             type: integer
+                                            example: 1
                                         accion:
                                             type: string
+                                            example: Acción realizada
                                         fecha:
                                             type: string
                                             format: date-time
+                                            example: 2022-01-01T00:00:00Z
                                         usuario:
                                             type: string
+                                            example: Usuario
                 "401":
                     description: Token requerido
                 "404":
