@@ -1,0 +1,415 @@
+openapi: 3.1.0
+info:
+    title: MARVI API
+    description: API desarrollada para facilitar la comunicación entre la base de datos de la empresa MARVI y su panel administrativo.
+    version: 1.0.0
+components:
+    securitySchemes:
+        bearerAuth:
+            type: http
+            scheme: bearer
+            bearerFormat: JWT
+servers:
+    - url: https://marvi-api.onrender.com
+paths:
+    /users/admin:
+        get:
+            summary: Crear un usuario administrador
+            responses:
+                "201":
+                    description: Usuario administrador creado exitosamente
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    id_usuario:
+                                        type: integer
+                                    usuario:
+                                        type: string
+                                    nombre:
+                                        type: string
+                                    primer_apellido:
+                                        type: string
+                                    segundo_apellido:
+                                        type: string
+                                    correo:
+                                        type: string
+                                    telefono:
+                                        type: string
+                                    foto_src:
+                                        type: string
+                                    rol:
+                                        type: string
+                "500":
+                    description: Error creando usuario o el usuario Administrador ya existe
+    /login:
+        post:
+            summary: Iniciar sesión
+            requestBody:
+                description: Credenciales de usuario
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                usuario:
+                                    type: string
+                                contrasena:
+                                    type: string
+            responses:
+                "200":
+                    description: Inicio de sesión exitoso
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    accessToken:
+                                        type: string
+                                    refreshToken:
+                                        type: string
+                "401":
+                    description: Credenciales inválidas
+    /login/refresh:
+        post:
+            summary: Refrescar token de acceso
+            requestBody:
+                description: Token de actualización
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                refreshToken:
+                                    type: string
+            responses:
+                "200":
+                    description: Token de acceso actualizado
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    access:
+                                        type: string
+                "400":
+                    description: Refresh token requerido
+                "403":
+                    description: Refresh token inválido o expirado
+    /users:
+        get:
+            summary: Obtener todos los usuarios
+            security:
+                - bearerAuth: []
+            responses:
+                "200":
+                    description: Usuarios obtenidos exitosamente
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    type: object
+                                    properties:
+                                        id_usuario:
+                                            type: integer
+                                        usuario:
+                                            type: string
+                                        nombre:
+                                            type: string
+                                        primer_apellido:
+                                            type: string
+                                        segundo_apellido:
+                                            type: string
+                                        correo:
+                                            type: string
+                                        telefono:
+                                            type: string
+                                        foto_src:
+                                            type: string
+                                        rol:
+                                            type: string
+                "401":
+                    description: Token requerido
+                "404":
+                    description: No se ha registrado ningún usuario
+                "500":
+                    description: Error obteniendo usuarios
+        post:
+            summary: Crear un usuario
+            security:
+                - bearerAuth: []
+            requestBody:
+                description: Datos del usuario
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                usuario:
+                                    type: string
+                                nombre:
+                                    type: string
+                                primer_apellido:
+                                    type: string
+                                segundo_apellido:
+                                    type: string
+                                correo:
+                                    type: string
+                                telefono:
+                                    type: string
+                                contrasena:
+                                    type: string
+                                foto_src:
+                                    type: string
+                                rol:
+                                    type: string
+            responses:
+                "201":
+                    description: Usuario creado exitosamente
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    id_usuario:
+                                        type: integer
+                                    usuario:
+                                        type: string
+                                    nombre:
+                                        type: string
+                                    primer_apellido:
+                                        type: string
+                                    segundo_apellido:
+                                        type: string
+                                    correo:
+                                        type: string
+                                    telefono:
+                                        type: string
+                                    foto_src:
+                                        type: string
+                                    rol:
+                                        type: string
+                "401":
+                    description: Token requerido
+                "400":
+                    description: No puedes realizar esta accion
+                "500":
+                    description: Error creando usuario
+    /users/{id_usuario}:
+        put:
+            summary: Actualizar un usuario
+            security:
+                - bearerAuth: []
+            parameters:
+                - in: path
+                  name: id_usuario
+                  required: true
+                  schema:
+                      type: integer
+                  description: ID del usuario a actualizar
+            requestBody:
+                description: Datos del usuario a actualizar
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                usuario:
+                                    type: string
+                                nombre:
+                                    type: string
+                                primer_apellido:
+                                    type: string
+                                segundo_apellido:
+                                    type: string
+                                correo:
+                                    type: string
+                                telefono:
+                                    type: string
+                                contrasena:
+                                    type: string
+                                foto_src:
+                                    type: string
+                                rol:
+                                    type: string
+            responses:
+                "200":
+                    description: Usuario actualizado exitosamente
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    id_usuario:
+                                        type: integer
+                                    usuario:
+                                        type: string
+                                    nombre:
+                                        type: string
+                                    primer_apellido:
+                                        type: string
+                                    segundo_apellido:
+                                        type: string
+                                    correo:
+                                        type: string
+                                    telefono:
+                                        type: string
+                                    foto_src:
+                                        type: string
+                                    rol:
+                                        type: string
+                "401":
+                    description: Token requerido
+                "500":
+                    description: Error actualizando usuario
+        delete:
+            summary: Eliminar un usuario
+            security:
+                - bearerAuth: []
+            parameters:
+                - in: path
+                  name: id_usuario
+                  required: true
+                  schema:
+                      type: integer
+                  description: ID del usuario a eliminar
+            responses:
+                "200":
+                    description: Usuario eliminado exitosamente
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    message:
+                                        type: string
+                "400":
+                    description: No puedes realizar esta accion
+                "401":
+                    description: Token requerido"
+                "500":
+                    description: Error eliminando usuario
+    /users/{usuario}:
+        get:
+            summary: Obtener un usuario por nombre de usuario
+            security:
+                - bearerAuth: []
+            parameters:
+                - in: path
+                  name: usuario
+                  required: true
+                  schema:
+                      type: string
+                  description: Nombre de usuario a obtener
+            responses:
+                "200":
+                    description: Usuario obtenido exitosamente
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    id_usuario:
+                                        type: integer
+                                    usuario:
+                                        type: string
+                                    nombre:
+                                        type: string
+                                    primer_apellido:
+                                        type: string
+                                    segundo_apellido:
+                                        type: string
+                                    correo:
+                                        type: string
+                                    telefono:
+                                        type: string
+                                    foto_src:
+                                        type: string
+                                    rol:
+                                        type: string
+                "401":
+                    description: Token requerido"
+                "404":
+                    description: Usuario no encontrado
+                "500":
+                    description: Error obteniendo usuario por usuario
+    /users/email/{correo}:
+        get:
+            summary: Obtener un usuario por correo
+            security:
+                - bearerAuth: []
+            parameters:
+                - in: path
+                  name: correo
+                  required: true
+                  schema:
+                      type: string
+                  description: Correo del usuario a obtener
+            responses:
+                "200":
+                    description: Usuario obtenido exitosamente
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    id_usuario:
+                                        type: integer
+                                    usuario:
+                                        type: string
+                                    nombre:
+                                        type: string
+                                    primer_apellido:
+                                        type: string
+                                    segundo_apellido:
+                                        type: string
+                                    correo:
+                                        type: string
+                                    telefono:
+                                        type: string
+                                    foto_src:
+                                        type: string
+                                    rol:
+                                        type: string
+                "401":
+                    description: Token requerido"
+                "404":
+                    description: Usuario no encontrado
+                "500":
+                    description: Error obteniendo usuario por correo
+    /logs:
+        get:
+            summary: Obtener todos los logs
+            security:
+                - bearerAuth: []
+            responses:
+                "200":
+                    description: Logs obtenidos exitosamente
+                    content:
+                        application/json:
+                            schema:
+                                type: array
+                                items:
+                                    type: object
+                                    properties:
+                                        id:
+                                            type: integer
+                                        accion:
+                                            type: string
+                                        fecha:
+                                            type: string
+                                            format: date-time
+                                        usuario:
+                                            type: string
+                "401":
+                    description: Token requerido
+                "404":
+                    description: No se ha registrado ningún log
+                "500":
+                    description: Error obteniendo logs
