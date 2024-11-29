@@ -1,5 +1,5 @@
-/* global cors */
 import express from "express";
+import cors from "cors";
 import logRoutes from "./routes/logRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
@@ -35,6 +35,5 @@ app.use("/users", userRoutes);
 // Iniciar el servidor
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-    // Necesario para informar al desarrollador sobre la URL del servidor durante el desarrollo y las pruebas
-    console.log(`Servidor corriendo en http://localhost:${PORT}`); // skipcq: JS-0002
+    console.log("Servidor corriendo"); // skipcq: JS-0002
 });
