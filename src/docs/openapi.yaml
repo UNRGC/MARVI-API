@@ -66,8 +66,10 @@ paths:
                             properties:
                                 usuario:
                                     type: string
+                                    example: admin
                                 contrasena:
                                     type: string
+                                    example: 12345678
             responses:
                 "200":
                     description: Inicio de sesión exitoso
@@ -500,3 +502,36 @@ paths:
                     description: No se ha registrado ningún log
                 "500":
                     description: Error obteniendo logs
+    /email/send:
+        post:
+            summary: Enviar correo electrónico
+            requestBody:
+                description: Datos del correo electrónico
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            type: object
+                            properties:
+                                destinatario:
+                                    type: string
+                                    example: usuario@dominio.com
+                                asunto:
+                                    type: string
+                                    example: Asunto del correo
+                                mensaje:
+                                    type: string
+                                    example: Mensaje del correo
+            responses:
+                "200":
+                    description: Correo electrónico enviado exitosamente
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    message:
+                                        type: string
+                                        example: Correo enviado exitosamente
+                "500":
+                    description: Error enviando correo electrónico

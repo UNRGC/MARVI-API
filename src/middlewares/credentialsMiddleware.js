@@ -125,3 +125,12 @@ export const validateFormat = (req, res, next) => {
     // Si no hay conflictos, continuar con la siguiente función
     next();
 };
+
+export const validateInjectionsEmail = (req, res, next) => {
+    // Validar la el campo de correo de recuperación
+    if (validateInjections(req, res)) return;
+    if (validateEmail(req, res)) return;
+
+    // Si no hay conflictos, continuar con la siguiente función
+    next();
+};
