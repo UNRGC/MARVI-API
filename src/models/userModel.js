@@ -46,12 +46,12 @@ export const getUser = async (usuario) => {
 export const getUserEmail = async (correo) => {
     try {
         // Obtener un usuario de la base de datos
-        const res = await client.query("SELECT * FROM usuarios WHERE correo = $1", [correo]);
+        const res = await client.query("SELECT usuario, correo FROM usuarios WHERE correo = $1", [correo]);
         // Retornar el usuario obtenido
         return res.rows[0];
     } catch (err) {
         // manejo de errores
-        console.error("Error obteniendo usuario por correo:", err);
+        console.error("Error obteniendo correo:", err);
         throw err;
     }
 };

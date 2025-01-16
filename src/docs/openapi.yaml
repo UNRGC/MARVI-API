@@ -416,8 +416,6 @@ paths:
     /users/email/{correo}:
         get:
             summary: Obtener un usuario por correo
-            security:
-                - bearerAuth: []
             parameters:
                 - in: path
                   name: correo
@@ -433,35 +431,12 @@ paths:
                             schema:
                                 type: object
                                 properties:
-                                    id_usuario:
-                                        type: integer
-                                        example: 2
                                     usuario:
                                         type: string
                                         example: usuario
-                                    nombre:
-                                        type: string
-                                        example: Usuario
-                                    primer_apellido:
-                                        type: string
-                                        example: Apellido
-                                    segundo_apellido:
-                                        type: string
-                                        example: Apellido
                                     correo:
                                         type: string
                                         example: usuario@usuario.com
-                                    telefono:
-                                        type: string
-                                        example: 123 456 7890
-                                    contrasena:
-                                        type: string
-                                        example: 12345678
-                                    foto_src:
-                                        type: string
-                                    rol:
-                                        type: string
-                                        example: Usuario
                 "401":
                     description: Token requerido"
                 "404":

@@ -123,7 +123,7 @@ export const getUserEmailHandler = async (req, res) => {
     } catch (err) {
         // Manejo de errores
         console.error("Error obteniendo usuario por correo:", err);
-        res.status(500).json({ message: "Error obteniendo usuario por correo" });
+        res.status(500).json({ message: "Correo no encontrado." });
     }
 };
 

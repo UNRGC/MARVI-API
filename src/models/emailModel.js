@@ -15,14 +15,13 @@ const transporter = createTransport({
 });
 
 // Crea una función para enviar correos
-const sendMailTransporter = async (destinatario, asunto, mensaje) => {
+const sendMailTransporter = async (correo, asunto, htmlMessage) => {
     try {
         const info = await transporter.sendMail({
             from: "MARVI no-reply", // Remitente
-            to: destinatario, // Destinatario
+            to: correo, // Destinatario
             subject: asunto, // Asunto del correo
-            text: mensaje, // Mensaje en texto plano
-            // html: '<b>Mensaje en HTML</b>', // Opcional, si quieres enviar HTML
+            html: htmlMessage, // Mensaje en formato HTML
         });
 
         // skipcq: JS-0002

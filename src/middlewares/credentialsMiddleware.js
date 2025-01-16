@@ -29,7 +29,7 @@ const validateEmail = (req, res) => {
 
     // Verificar si el correo tiene un formato válido
     if (!/\S+@\S+\.\S+/.test(correo)) {
-        res.status(400).json({ message: "El correo tiene un formato válido." });
+        res.status(400).json({ message: "El correo tiene un formato invalido." });
         return true;
     }
 

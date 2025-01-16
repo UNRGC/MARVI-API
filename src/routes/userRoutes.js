@@ -15,7 +15,7 @@ router.put("/:id_usuario", authenticateToken, validateFormat, updateUserHandler)
 // Ruta para obtener un usuario
 router.get("/:usuario", authenticateToken, getUserHandler);
 // Ruta para obtener un usuario por correo
-router.get("/email/:correo", authenticateToken, getUserEmailHandler);
+router.get("/email/:correo", getUserEmailHandler);
 // Ruta para obtener todos los usuarios
 router.get("/", authenticateToken, getAllUsersHandler);
 // Ruta para eliminar un usuario
