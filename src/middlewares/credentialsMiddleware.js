@@ -1,14 +1,14 @@
-import { getAllUsers } from "../models/userModel.js";
+import { getUsersUnique } from "../models/userModel.js";
 
 // Función para verificar si hay inyección de código en los datos de entrada
 const validateInjections = (req, res) => {
     // Obtener los datos del cuerpo de la solicitud
-    const { usuario, nombre, primer_apellido, segundo_apellido, correo, telefono, contrasena, rol, foto_src } = req.body;
+    const { usuario, nombre, primer_apellido, segundo_apellido, correo, telefono, contrasena, rol, estado, foto_src } = req.body;
 
     // Crear un arreglo con los datos de entrada
-    const inputs = [usuario, nombre, primer_apellido, segundo_apellido, correo, telefono, contrasena, rol, foto_src];
+    const inputs = [usuario, nombre, primer_apellido, segundo_apellido, correo, telefono, contrasena, rol, estado, foto_src];
     // Crear un patrón de inyección de código más específico
-    const injectionPattern = /['"=;(){}<>]/;
+    const injectionPattern = /['"=;(){}<>]|--|\b(SELECT|INSERT|UPDATE|DELETE|DROP|ALTER|CREATE|EXEC|UNION|SCRIPT)\b/i;
 
     // Verificar si hay inyección de código en los datos
     for (const input of inputs) {
@@ -73,8 +73,8 @@ const validateRole = (req, res) => {
     const { rol } = req.body;
 
     // Verificar si el rol es válido
-    if (rol !== "Administrador" && rol !== "Usuario" && rol !== "Invitado") {
-        res.status(400).json({ message: "El rol debe ser 'Administrador', 'Usuario' o 'Invitado'." });
+    if (rol !== "A" && rol !== "U" && rol !== "I") {
+        res.status(400).json({ message: "El rol debe ser 'A', 'U' o 'I'." });
         return true;
     }
 
@@ -85,9 +85,9 @@ const validateRole = (req, res) => {
 // Función para validar si el usuario ya existe
 export const validateUser = async (req, res, id_usuario = null) => {
     // Obtener los datos del cuerpo de la solicitud
-    const { usuario, correo } = req.body;
+    const { usuario, correo, telefono } = req.body;
     /// Obtener todos los usuarios de la base de datos
-    const usuarios = await getAllUsers();
+    const usuarios = await getUsersUnique();
 
     // Convertir id_usuario a número si no es nulo
     const id_usuarioNum = id_usuario !== null ? Number(id_usuario) : null;
@@ -96,6 +96,8 @@ export const validateUser = async (req, res, id_usuario = null) => {
     const usuarioExists = usuarios.find((user) => user.usuario === usuario && user.id_usuario !== id_usuarioNum);
     // Verificar si el correo ya existe y no es el mismo usuario que se está actualizando
     const correoExists = usuarios.find((user) => user.correo === correo && user.id_usuario !== id_usuarioNum);
+    // Verifica si el número de teléfono ya existe y no es el mismo usuario que se está actualizando
+    const telefonoExists = usuarios.find((user) => user.telefono === telefono && user.id_usuario !== id_usuarioNum);
 
     // Si el nombre de usuario ya existe, responder con un error 400
     if (usuarioExists) {
@@ -106,6 +108,12 @@ export const validateUser = async (req, res, id_usuario = null) => {
     // Si el correo ya existe, responder con un error 400
     if (correoExists) {
         res.status(400).json({ message: "El correo ya existe." });
+        return true;
+    }
+
+    // Si el número de teléfono ya existe, responder con un error 400
+    if (telefonoExists) {
+        res.status(400).json({ message: "El teléfono ya existe." });
         return true;
     }
 

@@ -1,7 +1,6 @@
 import express from "express";
 import cors from "cors";
 import emailRouter from "./routes/emailRoutes.js";
-import logRoutes from "./routes/logRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import { connectDB } from "./config/db.js";
@@ -30,7 +29,6 @@ app.use((err, req, res, next) => {
 
 // Rutas
 app.use("/email", emailRouter);
-app.use("/logs", logRoutes);
 app.use("/login", authRoutes);
 app.use("/users", userRoutes);
 

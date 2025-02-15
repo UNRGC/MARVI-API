@@ -1,5 +1,4 @@
-import { createUser, updateUser, getUser, getUserEmail, getAllUsers, deleteUser } from "../models/userModel.js";
-import { createLog } from "../models/logModel.js";
+import { createUser, updateUser, getUser, getUserEmail, getAllUsers, deleteUser, getUsersOrder, getUsersSearch, setUserStatus } from "../models/userModel.js";
 import { config } from "dotenv";
 import { validateUser } from "../middlewares/credentialsMiddleware.js";
 import encryptPassword from "../utils/encryptPassword.js";
@@ -11,14 +10,19 @@ export const createAdminHandler = async (req, res) => {
     try {
         // Asignar el usuario administrador
         req.body = JSON.parse(process.env.ADMIN);
+
         // Obtener los datos del cuerpo de la solicitud
-        const { usuario, nombre, primer_apellido, segundo_apellido, correo, contrasena, rol } = req.body;
+        const { usuario, nombre, primer_apellido, segundo_apellido, correo, telefono, contrasena, rol } = req.body;
+
         // Validar las credenciales del nuevo usuario
         if (await validateUser(req, res)) return;
+
         // Encriptar la contraseña del nuevo usuario
         const hashedPassword = await encryptPassword(contrasena);
+
         // Crear el nuevo usuario en la base de datos
-        const newUser = await createUser(usuario, nombre, primer_apellido, segundo_apellido, correo, null, hashedPassword, null, rol);
+        const newUser = await createUser(usuario, nombre, primer_apellido, segundo_apellido, correo, telefono, hashedPassword, rol);
+
         // Responder con el nuevo usuario creado
         res.status(201).json(newUser);
     } catch (err) {
@@ -31,21 +35,22 @@ export const createAdminHandler = async (req, res) => {
 // Controlador para crear un usuario
 export const createUserHandler = async (req, res) => {
     // Obtener los datos del cuerpo de la solicitud
-    const { usuario, nombre, primer_apellido, segundo_apellido, correo, telefono, contrasena, foto_src, rol } = req.body;
+    const { usuario, nombre, primer_apellido, segundo_apellido, correo, telefono, contrasena, rol } = req.body;
 
     // Verificar si el usuario autenticado tiene el rol de "Administrador"
-    if (req.user.rol !== "Administrador") {
+    if (req.user.rol !== "A") {
         res.status(400).json({ message: "No puedes realizar esta accion" });
     } else {
         try {
             // Validar las credenciales del nuevo usuario
             if (await validateUser(req, res)) return;
+
             // Encriptar la contraseña del nuevo usuario
             const hashedPassword = await encryptPassword(contrasena);
+
             // Crear el nuevo usuario en la base de datos
-            const newUser = await createUser(usuario, nombre, primer_apellido, segundo_apellido, correo, telefono, hashedPassword, foto_src, rol);
-            // Crear un registro de log para la creación del usuario
-            await createLog(req.user.usuario, `Usuario creado: ${usuario}`);
+            const newUser = await createUser(usuario, nombre, primer_apellido, segundo_apellido, correo, telefono, hashedPassword, rol);
+
             // Responder con el nuevo usuario creado
             res.status(201).json(newUser);
         } catch (err) {
@@ -71,10 +76,7 @@ export const updateUserHandler = async (req, res) => {
         const hashedPassword = await encryptPassword(contrasena);
 
         // Actualizar el usuario en la base de datos
-        const updatedUser = await updateUser(id_usuario, usuario, nombre, primer_apellido, segundo_apellido, correo, telefono, hashedPassword, foto_src, rol);
-
-        // Crear un registro de log para la actualización del usuario
-        await createLog(req.user.usuario, `Usuario actualizado: ${usuario}`);
+        const updatedUser = await updateUser(id_usuario, usuario, nombre, primer_apellido, segundo_apellido, correo, telefono, hashedPassword, rol, foto_src);
 
         // Responder con el usuario actualizado
         res.status(200).json(updatedUser);
@@ -82,6 +84,29 @@ export const updateUserHandler = async (req, res) => {
         // Manejo de errores
         console.error("Error actualizando usuario:", err);
         res.status(500).json({ message: "Error actualizando usuario." });
+    }
+};
+
+// Controlador para eliminar un usuario
+export const deleteUserHandler = async (req, res) => {
+    // Obtener el ID del usuario de los parámetros de la solicitud
+    const { usuario } = req.params;
+
+    // Verificar si el usuario autenticado tiene el rol de "Administrador" y no está intentando eliminarse a sí mismo
+    if (req.user.rol !== "A" || req.user.usuario === usuario) {
+        res.status(400).json({ message: "No puedes realizar esta accion" });
+    } else {
+        try {
+            // Eliminar el usuario de la base de datos
+            const user = await deleteUser(usuario);
+
+            // Responder con el usuario eliminado
+            res.status(200).json(user);
+        } catch (err) {
+            // Manejo de errores
+            console.error("Error eliminando usuario:", err);
+            res.status(500).json({ message: "Error eliminando usuario." });
+        }
     }
 };
 
@@ -127,10 +152,10 @@ export const getUserEmailHandler = async (req, res) => {
     }
 };
 
-// Controlador para obtener todos los usuarios
+// Controlador para obtenerel número de usuarios
 export const getAllUsersHandler = async (req, res) => {
     try {
-        // Obtener todos los usuarios de la base de datos
+        // Obtener el número de usuarios de la base de datos
         const users = await getAllUsers();
 
         // Verificar si no se encontraron usuarios
@@ -145,28 +170,62 @@ export const getAllUsersHandler = async (req, res) => {
     }
 };
 
-// Controlador para eliminar un usuario
-export const deleteUserHandler = async (req, res) => {
+// Controlador para obtener todos los usuarios
+export const getUsersOrderHandler = async (req, res) => {
+    // Obtener los parámetros de la solicitud
+    const { columna, orden, limite, salto } = req.body;
+
+    try {
+        // Obtener todos los usuarios de la base de datos con paginación
+        const users = await getUsersOrder(columna, orden, limite, salto);
+
+        // Verificar si no se encontraron usuarios
+        if (users.length === 0) {
+            res.status(404).json({ message: "No se ah registrado ningún usuario." });
+            return;
+        } else res.status(200).json(users); // Responder con los usuarios obtenidos
+    } catch (err) {
+        // Manejo de errores
+        console.error("Error obteniendo usuarios:", err);
+        res.status(500).json({ message: "Error obteniendo usuarios" });
+    }
+};
+
+// Controlador para obtener todos los usuarios con una busqueda
+export const getUsersSearchHandler = async (req, res) => {
+    // Obtener los parámetros de la solicitud
+    const { busqueda, columna, orden, limite, salto } = req.body;
+
+    try {
+        // Obtener todos los usuarios de la base de datos con paginación
+        const users = await getUsersSearch(busqueda, columna, orden, limite, salto);
+
+        // Verificar si no se encontraron usuarios
+        if (users.length === 0) {
+            res.status(404).json({ message: "No se ah registrado ningún usuario." });
+            return;
+        } else res.status(200).json(users); // Responder con los usuarios obtenidos
+    } catch (err) {
+        // Manejo de errores
+        console.error("Error obteniendo usuarios:", err);
+        res.status(500).json({ message: "Error obteniendo usuarios" });
+    }
+};
+
+// Controlador para actualizar el estado de un usuario
+export const updateUserStatusHandler = async (req, res) => {
     // Obtener el ID del usuario de los parámetros de la solicitud
-    const { id_usuario } = req.params;
+    const { id_usuario, estado } = req.body;
 
-    // Verificar si el usuario autenticado tiene el rol de "Administrador" y no está intentando eliminarse a sí mismo
-    if (req.user.rol !== "Administrador" || req.user.id_usuario === Number(id_usuario)) {
-        res.status(400).json({ message: "No puedes realizar esta accion" });
-    } else {
-        try {
-            // Eliminar el usuario de la base de datos
-            const user = await deleteUser(id_usuario);
+    try {
+        // Actualizar el estado del usuario en la base de datos
+        const updatedUser = await setUserStatus(id_usuario, estado);
 
-            // Crear un registro de log para la eliminación del usuario
-            await createLog(req.user.usuario, `Usuario eliminado: ${user.usuario}`);
-
-            // Responder con el usuario eliminado
-            res.status(200).json({ message: `Usuario eliminado: ${user.usuario}.` });
-        } catch (err) {
-            // Manejo de errores
-            console.error("Error eliminando usuario:", err);
-            res.status(500).json({ message: "Error eliminando usuario." });
-        }
+        // Responder con el usuario actualizado
+        res.status(200).json(updatedUser);
+    } catch (err) {
+        // Manejo de errores
+        console.error("Error actualizando usuario:", err);
+        res.status(500).json({ message: "Error actualizando usuario." });
     }
 };
