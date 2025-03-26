@@ -14,6 +14,15 @@ export const getSecret = () => {
     return JWT_SECRET;
 };
 
+export const getCreated = () => {
+    const envFilePath = ".env";
+    const envContent = readFileSync(envFilePath, "utf8");
+    const envVariables = envContent.split("\n").map((line) => line.split("="));
+    const envObject = Object.fromEntries(envVariables);
+    const { CREATED } = envObject;
+    return CREATED;
+};
+
 export const envStart = () => {
     const envFilePath = ".env";
     if (!existsSync(envFilePath)) {
@@ -21,6 +30,7 @@ export const envStart = () => {
 PORT=3000
 DB_USER=
 DB_PASSWORD=
+DB_SERVER=
 DB_NAME=
 DB_URI=
 SERVER_EMAIL=gmail
@@ -28,7 +38,9 @@ USER_EMAIL=
 PASSWORD_EMAIL=
 TIME_ZONE=America/Mexico_City
 DATE_FORMAT=DD/MM/YYYY
-TIME_FORMAT=HH:mm:ss`;
+TIME_FORMAT=HH:mm:ss
+ONLINE=false
+CREATED=false`;
 
         writeFileSync(envFilePath, envContent, "utf8");
         console.debug("Entorno creado con éxito");

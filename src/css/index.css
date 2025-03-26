@@ -331,7 +331,7 @@ button:disabled {
     border-radius: 5px 5px 0 0;
     color: var(--text);
 }
-.connection-col > :not(select, input, label) {
+.connection-col > :not(select, input, label, .button-group) {
     margin: -16px -16px 0 -16px;
 }
 

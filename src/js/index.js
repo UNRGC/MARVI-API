@@ -20,7 +20,9 @@ const usersSection = document.querySelector(".users");
 const formConnection = document.querySelector(".connection");
 const userInput = document.getElementById("user");
 const passInput = document.getElementById("pass");
+const serverInput = document.getElementById("server");
 const databaseInput = document.getElementById("database");
+const onlineInput = document.getElementById("online");
 const serviceSelect = document.getElementById("service");
 const emailInput = document.getElementById("email");
 const passwordInput = document.getElementById("password");
@@ -122,7 +124,7 @@ formConnection.addEventListener("submit", async (e) => {
     e.preventDefault();
 
     if (await alertConfirm("¿Deseas aplicar los cambios?", "Esta acción no se puede deshacer. Asegúrate de tener las credenciales correctas antes de proceder.", "warning")) {
-        const response = await updateConnection(userInput.value, passInput.value, databaseInput.value, serviceSelect.value, emailInput.value, passwordInput.value, timeZoneInput.value, dateFormatInput.value);
+        const response = await updateConnection(userInput.value, passInput.value, serverInput.value, databaseInput.value, onlineInput.checked, serviceSelect.value, emailInput.value, passwordInput.value, timeZoneInput.value, dateFormatInput.value);
 
         if (response.message.includes("éxito")) {
             const action = async () => {
@@ -190,7 +192,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         const data = await getConnection();
 
         userInput.value = data.DB_USER;
+        serverInput.value = data.DB_SERVER;
         databaseInput.value = data.DB_NAME;
+        onlineInput.checked = data.ONLINE === "true";
         serviceSelect.value = data.SERVER_EMAIL;
         emailInput.value = data.USER_EMAIL;
         timeZoneInput.value = data.TIME_ZONE;

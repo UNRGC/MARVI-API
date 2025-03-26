@@ -1,15 +1,17 @@
 import { get, post } from "./api.js";
 
 export const getConnection = async () => {
-    const response = await get("env/");
+    const response = await get("env");
     return response;
 };
 
-export const updateConnection = async (dbUser, dbPass, dbName, serverEmail, email, password, timeZone, dateFormat, timeFormat) => {
+export const updateConnection = async (dbUser, dbPass, dbServer, dbName, online, serverEmail, email, password, timeZone, dateFormat, timeFormat) => {
     const data = {
         dbUser,
         dbPass,
+        dbServer,
         dbName,
+        online,
         serverEmail,
         email,
         password,
@@ -18,6 +20,6 @@ export const updateConnection = async (dbUser, dbPass, dbName, serverEmail, emai
         timeFormat,
     };
 
-    const response = await post("env/", data);
+    const response = await post("env", data);
     return response;
 };

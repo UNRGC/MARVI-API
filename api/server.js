@@ -11,13 +11,19 @@ import { connectDB } from "./src/config/db.js";
 import { envStart } from "./src/config/env.js";
 import htmlStart from "./src/config/html.js";
 import os from "os";
+import { config } from "dotenv";
+
+// Cargar las variables de entorno
+config();
 
 // Crear la aplicación Express
 const app = express();
 
 try {
-    // Crear las variables de entorno
-    envStart();
+    if (process.env.ONLINE === "false") {
+        // Crear las variables de entorno
+        envStart();
+    }
 
     // Crear las plantillas HTML
     htmlStart();

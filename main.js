@@ -3,6 +3,9 @@ import { spawn } from "child_process";
 import path from "path";
 import { fileURLToPath } from "url";
 import { del } from "./src/js/api.js";
+import { config } from "dotenv";
+
+config();
 
 // Obtener el nombre de archivo y el directorio actual
 const __filename = fileURLToPath(import.meta.url);
@@ -74,7 +77,8 @@ app.whenReady().then(() => {
 
     // Manejar el cierre de la ventana
     app.on("window-all-closed", async () => {
-        const response = await del("login/logout");
+        let response = { message: "Cerrado" };
+        if (process.env.CREATED === "true") response = await del("login/logout");
         if (process.platform !== "darwin") {
             console.debug(response.message);
             app.quit();
