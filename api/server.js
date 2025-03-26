@@ -103,11 +103,5 @@ const shutdown = () => {
 };
 
 // Capturar señales del sistema
-process.on("SIGINT", shutdown);
 process.on("SIGTERM", shutdown);
-process.on("SIGQUIT", shutdown);
-process.on("SIGHUP", shutdown);
-process.on("SIGBREAK", shutdown);
-process.on("SIGABRT", shutdown);
 process.on("SIGKILL", shutdown);
-process.on("exit", shutdown);
