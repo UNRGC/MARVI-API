@@ -1,23 +1,24 @@
 import express from "express";
+import { deniedInjections } from "../utils/security.js";
 import { registerProductHandler, updateProductHandler, deleteProductHandler, getProductHandler, getProductsHandler, searchProductsHandler, nextPurchaseHandler } from "../controls/productsControls.js";
 
 // Crea nueva instancia de un router de express
 const router = express.Router();
 
 // Ruta para crear productos
-router.post("/", registerProductHandler);
+router.post("/", deniedInjections, registerProductHandler);
 // Ruta para actualizar productos
-router.put("/", updateProductHandler);
+router.put("/", deniedInjections, updateProductHandler);
 // Ruta para eliminar productos
-router.delete("/:codigo", deleteProductHandler);
+router.delete("/:codigo", deniedInjections, deleteProductHandler);
 // Ruta para buscar productos
-router.get("/search", searchProductsHandler);
+router.get("/search", deniedInjections, searchProductsHandler);
 // Ruta para obtener productos
-router.get("/:codigo", getProductHandler);
+router.get("/:codigo", deniedInjections, getProductHandler);
 // Ruta para obtener todos los productos filtrados
-router.get("/", getProductsHandler);
+router.get("/", deniedInjections, getProductsHandler);
 // Ruta para crear la próxima compra
-router.post("/nextPurchase", nextPurchaseHandler);
+router.post("/nextPurchase", deniedInjections, nextPurchaseHandler);
 
 // Exporta el router
 export default router;

@@ -22,10 +22,9 @@ function createWindow() {
         width: 800,
         height: 800,
         webPreferences: {
-            // skipcq: JS-S1019
-            nodeIntegration: true,
-            // skipcq: JS-S1020
             contextIsolation: false,
+            enableRemoteModule: false,
+            nodeIntegration: true,
         },
         icon: path.join(__dirname, "src/img", "icon.png"),
     });
@@ -37,7 +36,7 @@ function createWindow() {
     mainWindow.loadFile("index.html");
 
     // Abre las herramientas de desarrollo
-    mainWindow.webContents.openDevTools();
+    // mainWindow.webContents.openDevTools();
 }
 
 app.whenReady().then(() => {
@@ -77,12 +76,11 @@ app.whenReady().then(() => {
 
     // Manejar el cierre de la ventana
     app.on("window-all-closed", async () => {
-        let response = { message: "Cerrado" };
-        if (process.env.CREATED === "true") response = await del("login/logout");
-        if (process.platform !== "darwin") {
+        if (process.env.CREATED === "true") {
+            const response = await del("login/logout");
             console.debug(response.message);
-            app.quit();
         }
+        app.quit();
     });
 });
 

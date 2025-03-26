@@ -11,9 +11,7 @@ CREATE INDEX idx_rol_nombre ON roles (nombre);
 
 -- Vistas de roles
 
-CREATE OR REPLACE VIEW vst_roles AS
-SELECT *
-FROM roles;
+CREATE OR REPLACE VIEW vst_roles AS SELECT * FROM roles;
 
 -- Default
 
@@ -62,9 +60,7 @@ CREATE INDEX idx_unidad_nombre ON unidades (nombre);
 
 -- Vistas de unidades
 
-CREATE OR REPLACE VIEW vst_unidades AS
-SELECT *
-FROM unidades;
+CREATE OR REPLACE VIEW vst_unidades AS SELECT * FROM unidades;
 
 -- Funciones de unidades
 
@@ -2331,11 +2327,11 @@ AS $$
         END IF;
 
         SELECT COUNT(*) INTO total
-            FROM vst_usuarios_activos u
+            FROM vst_usuarios u
         WHERE
             u.id_usuario = _id_usuario;
 
-        IF total = 0 THEN 
+        IF total = 0 THEN
             RAISE EXCEPTION 'El usuario no existe';
         END IF;
 

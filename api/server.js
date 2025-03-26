@@ -12,6 +12,7 @@ import { envStart } from "./src/config/env.js";
 import htmlStart from "./src/config/html.js";
 import os from "os";
 import { config } from "dotenv";
+import { closeAllSessions } from "./src/models/loginModel.js";
 
 // Cargar las variables de entorno
 config();
@@ -72,9 +73,41 @@ const getIPAddress = () => {
     return "localhost";
 };
 
+let server = null;
+
 // Iniciar el servidor
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+server = app.listen(PORT, () => {
     const ipAddress = getIPAddress();
     console.debug(`Servidor iniciado en ${ipAddress}:${PORT}`);
 });
+
+// Manejar eventos antes de que la API termine
+const shutdown = () => {
+    console.debug("Cerrando el servidor...");
+
+    // Cerrar conexiones abiertas y liberar recursos
+    server.close(async () => {
+        // cerrar sesiones de usuarios
+        const response = await closeAllSessions();
+        console.debug(response.notice);
+        console.debug("Servidor cerrado correctamente");
+        process.exit(0);
+    });
+
+    // Si hay procesos asíncronos, dar tiempo para terminarlos
+    setTimeout(() => {
+        console.warn("Forzando cierre...");
+        process.exit(1);
+    }, 5000);
+};
+
+// Capturar señales del sistema
+process.on("SIGINT", shutdown);
+process.on("SIGTERM", shutdown);
+process.on("SIGQUIT", shutdown);
+process.on("SIGHUP", shutdown);
+process.on("SIGBREAK", shutdown);
+process.on("SIGABRT", shutdown);
+process.on("SIGKILL", shutdown);
+process.on("exit", shutdown);
