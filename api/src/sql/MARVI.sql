@@ -2330,6 +2330,15 @@ AS $$
             RAISE EXCEPTION 'El teléfono no tiene un formato válido';
         END IF;
 
+        SELECT COUNT(*) INTO total
+            FROM vst_usuarios_activos u
+        WHERE
+            u.id_usuario = _id_usuario;
+
+        IF total = 0 THEN 
+            RAISE EXCEPTION 'El usuario no existe';
+        END IF;
+
         SELECT
             COUNT(*) INTO total
         FROM
