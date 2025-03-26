@@ -104,4 +104,4 @@ const shutdown = () => {
 
 // Capturar señales del sistema
 process.on("SIGTERM", shutdown);
-process.on("SIGKILL", shutdown);
+process.on("SIGINT", shutdown);
