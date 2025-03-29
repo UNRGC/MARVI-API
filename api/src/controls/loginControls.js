@@ -1,8 +1,8 @@
 import sendEmail from "../models/emailModel.js";
 import { login, changeState, forgotPassword, closeAllSessions } from "../models/loginModel.js";
 import { getUser } from "../models/usersModel.js";
-import { comparePassword } from "../utils/encryptPassword.js";
 import { config } from "dotenv";
+import bcrypt from "bcrypt";
 import fs from "fs";
 import moment from "moment-timezone";
 
@@ -13,7 +13,6 @@ export const loginHandler = async (req, res) => {
     try {
         const { usuario, contrasena } = req.body;
         const response = await login(usuario);
-        const loginResponse = await changeState({ usuario, estado: "Activo" });
         const userResponse = await getUser(usuario);
 
         const dateTZFechaRegistro = moment.utc(userResponse.rows[0].fecha_registro).tz(process.env.TIME_ZONE);
@@ -24,15 +23,18 @@ export const loginHandler = async (req, res) => {
         const formattedDateUltimaActividad = dateTZUltimaActividad.format(`${process.env.DATE_FORMAT} ${process.env.TIME_FORMAT}`);
         userResponse.rows[0].ultima_actividad = formattedDateUltimaActividad;
 
-        if (!response.rows[0].temporal && (await comparePassword(contrasena, response.rows[0].contrasena))) {
+        if (!response.rows[0].temporal && (await bcrypt.compare(contrasena, response.rows[0].contrasena))) {
+            const loginResponse = await changeState({ usuario, estado: "Activo" });
             console.debug(loginResponse.notice);
             res.status(200).json(userResponse.rows[0]);
         } else if (response.rows[0].temporal && contrasena === response.rows[0].contrasena) {
+            const loginResponse = await changeState({ usuario, estado: "Activo" });
             console.debug(loginResponse.notice);
             res.status(200).json(userResponse.rows[0]);
-        } else res.status(401).json({ message: "Credenciales incorrectas" });
-    } catch (err) {
-        res.status(500).json({ message: `Error al iniciar sesión, ${err.message}` });
+        } else res.status(401).json({ message: "Error de autenticación, las credenciales son invalidas" });
+    } catch (error) {
+        if (error.message === "El usuario no existe") res.status(500).json({ message: "Error de autenticación, las credenciales son invalidas" });
+        else res.status(500).json({ message: `Error al iniciar sesión, ${error.message}` });
     }
 };
 
@@ -43,8 +45,8 @@ export const logoutHandler = async (req, res) => {
         const response = await changeState({ usuario, estado: "Inactivo" });
         console.debug(response.notice);
         res.status(200).json({ message: response.notice });
-    } catch (err) {
-        res.status(500).json({ message: `Error al cerrar sesión, ${err.message}` });
+    } catch (error) {
+        res.status(500).json({ message: `Error al cerrar sesión, ${error.message}` });
     }
 };
 
@@ -62,9 +64,10 @@ export const forgotPasswordHandler = async (req, res) => {
             html: htmlContent,
         });
 
-        res.status(200).json({ message: "Correo de recuperación enviado" });
-    } catch (err) {
-        res.status(500).json({ message: `Error al recuperar la contraseña, ${err.message}` });
+        res.status(200).json({ message: "Correo de recuperación enviado, revisa tu bandeja de entrada y sigue las instrucciones para restablecer tu contraseña" });
+    } catch (error) {
+        if (error.message === "El correo no existe") res.status(500).json({ message: "Error al recuperar la contraseña, el correo no está registrado en el sistema" });
+        else res.status(500).json({ message: `Error al recuperar la contraseña, ${error.message}` });
     }
 };
 
@@ -74,7 +77,7 @@ export const closeAllSessionsHandler = async (req, res) => {
         const response = await closeAllSessions();
         console.debug(response.notice);
         res.status(200).json({ message: response.notice });
-    } catch (err) {
-        res.status(500).json({ message: `Error al cerrar todas las sesiones, ${err.message}` });
+    } catch (error) {
+        res.status(500).json({ message: `Error al cerrar todas las sesiones, ${error.message}` });
     }
 };

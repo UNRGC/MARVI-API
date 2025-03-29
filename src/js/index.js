@@ -128,7 +128,7 @@ formConnection.addEventListener("submit", async (e) => {
 
         if (response.message.includes("éxito")) {
             const action = async () => {
-                if (!(await alertToast("", "La aplicación se cerrara en % segundos", "info", 10000, "bottom"))) setTimeout(() => window.close(), 250);
+                await alertToast("", "La aplicación se cerrara en % segundos", "info", 10000, "bottom").finally(() => setTimeout(() => window.close(), 250));
             };
 
             if (await alertMessage("Cambios aplicados", "Los cambios se han guardado correctamente. Por favor, reinicia la aplicación para que surtan efecto.", "success", 5000)) action();

@@ -1,3 +1,7 @@
+-- Zone horaria
+
+SET TIME ZONE 'America/Mexico_City';
+
 -- Tabla roles
 
 CREATE TABLE IF NOT EXISTS roles (
@@ -764,7 +768,7 @@ CREATE TABLE IF NOT EXISTS clientes (
     primer_apellido VARCHAR(50) NOT NULL,
     segundo_apellido VARCHAR(50) DEFAULT NULL,
     correo VARCHAR(100) DEFAULT NULL,
-    telefono VARCHAR(12) DEFAULT NULL,
+    telefono VARCHAR(10) DEFAULT NULL,
     fecha_registro DATE DEFAULT CURRENT_DATE NOT NULL,
     activo BOOLEAN DEFAULT TRUE NOT NULL
 );
@@ -824,7 +828,7 @@ RETURNS TABLE (
     primer_apellido VARCHAR(50),
     segundo_apellido VARCHAR(50),
     correo VARCHAR(100),
-    telefono VARCHAR(12),
+    telefono VARCHAR(10),
     fecha_registro DATE,
     activo BOOLEAN
 )
@@ -867,7 +871,7 @@ RETURNS TABLE (
     codigo VARCHAR(10),
     nombre_completo VARCHAR(150),
     correo VARCHAR(100),
-    telefono VARCHAR(12),
+    telefono VARCHAR(10),
     fecha_registro DATE
 )
 LANGUAGE plpgsql
@@ -917,7 +921,7 @@ RETURNS TABLE (
     codigo VARCHAR(10),
     nombre_completo VARCHAR(150),
     correo VARCHAR(100),
-    telefono VARCHAR(12),
+    telefono VARCHAR(10),
     fecha_registro DATE
 )
 LANGUAGE plpgsql
@@ -954,7 +958,7 @@ CREATE OR REPLACE PROCEDURE registrar_cliente(
     _primer_apellido VARCHAR(50),
     _segundo_apellido VARCHAR(50) DEFAULT NULL,
     _correo VARCHAR(100) DEFAULT NULL,
-    _telefono VARCHAR(12) DEFAULT NULL
+    _telefono VARCHAR(10) DEFAULT NULL
 )
 LANGUAGE plpgsql
 AS $$
@@ -975,7 +979,7 @@ AS $$
                 RAISE EXCEPTION 'El correo del cliente no tiene un formato válido';
             END IF;
         ELSIF _telefono IS NOT NULL AND TRIM(_telefono) <> '' THEN
-            IF _telefono !~ '^[0-9]{10,12}$' THEN
+            IF _telefono !~ '^[0-9]{10,10}$' THEN
                 RAISE EXCEPTION 'El teléfono del cliente no tiene un formato válido';
             END IF;
         ELSE
@@ -1018,7 +1022,7 @@ CREATE OR REPLACE PROCEDURE actualizar_cliente(
     _primer_apellido VARCHAR(50),
     _segundo_apellido VARCHAR(50) DEFAULT NULL,
     _correo VARCHAR(100) DEFAULT NULL,
-    _telefono VARCHAR(12) DEFAULT NULL
+    _telefono VARCHAR(10) DEFAULT NULL
 )
 LANGUAGE plpgsql
 AS $$
@@ -1041,7 +1045,7 @@ AS $$
                 RAISE EXCEPTION 'El correo del cliente no tiene un formato válido';
             END IF;
         ELSIF _telefono IS NOT NULL AND TRIM(_telefono) <> '' THEN
-            IF _telefono !~ '^[0-9]{10,12}$' THEN
+            IF _telefono !~ '^[0-9]{10,10}$' THEN
                 RAISE EXCEPTION 'El teléfono del cliente no tiene un formato válido';
             END IF;
         ELSE
@@ -1565,7 +1569,7 @@ CREATE TABLE IF NOT EXISTS proveedores (
     codigo VARCHAR(10) NOT NULL,
     nombre VARCHAR(50) NOT NULL,
     correo VARCHAR(100) DEFAULT NULL,
-    telefono VARCHAR(12) DEFAULT NULL,
+    telefono VARCHAR(10) DEFAULT NULL,
     direccion VARCHAR(100) DEFAULT NULL,
     fecha_registro DATE DEFAULT CURRENT_DATE NOT NULL,
     activo BOOLEAN DEFAULT TRUE NOT NULL
@@ -1616,7 +1620,7 @@ RETURNS TABLE (
     codigo VARCHAR(10),
     nombre VARCHAR(50),
     correo VARCHAR(100),
-    telefono VARCHAR(12),
+    telefono VARCHAR(10),
     direccion VARCHAR(100),
     fecha_registro DATE,
     activo BOOLEAN
@@ -1660,7 +1664,7 @@ RETURNS TABLE (
     codigo VARCHAR(10),
     nombre VARCHAR(50),
     correo VARCHAR(100),
-    telefono VARCHAR(12),
+    telefono VARCHAR(10),
     fecha_registro DATE
 )
 LANGUAGE plpgsql
@@ -1710,7 +1714,7 @@ RETURNS TABLE (
     codigo VARCHAR(10),
     nombre VARCHAR(50),
     correo VARCHAR(100),
-    telefono VARCHAR(12),
+    telefono VARCHAR(10),
     fecha_registro DATE
 )
 LANGUAGE plpgsql
@@ -1745,7 +1749,7 @@ CREATE OR REPLACE PROCEDURE registrar_proveedor(
     _codigo VARCHAR(10),
     _nombre VARCHAR(50),
     _correo VARCHAR(100) DEFAULT NULL,
-    _telefono VARCHAR(12) DEFAULT NULL,
+    _telefono VARCHAR(10) DEFAULT NULL,
     _direccion VARCHAR(100) DEFAULT NULL
 )
 LANGUAGE plpgsql
@@ -1765,7 +1769,7 @@ AS $$
                 RAISE EXCEPTION 'El correo del proveedor no tiene un formato válido';
             END IF;
         ELSIF _telefono IS NOT NULL AND TRIM(_telefono) <> '' THEN
-            IF _telefono !~ '^[0-9]{10,12}$' THEN
+            IF _telefono !~ '^[0-9]{10,10}$' THEN
                 RAISE EXCEPTION 'El teléfono del proveedor no tiene un formato válido';
             END IF;
         ELSE
@@ -1803,7 +1807,7 @@ CREATE OR REPLACE PROCEDURE actualizar_proveedor(
     _codigo VARCHAR(10),
     _nombre VARCHAR(50),
     _correo VARCHAR(100) DEFAULT NULL,
-    _telefono VARCHAR(12) DEFAULT NULL,
+    _telefono VARCHAR(10) DEFAULT NULL,
     _direccion VARCHAR(100) DEFAULT NULL
 )
 LANGUAGE plpgsql
@@ -1825,7 +1829,7 @@ AS $$
                 RAISE EXCEPTION 'El correo del proveedor no tiene un formato válido';
             END IF;
         ELSIF _telefono IS NOT NULL AND TRIM(_telefono) <> '' THEN
-            IF _telefono !~ '^[0-9]{10,12}$' THEN
+            IF _telefono !~ '^[0-9]{10,10}$' THEN
                 RAISE EXCEPTION 'El teléfono del proveedor no tiene un formato válido';
             END IF;
         ELSE
@@ -1919,7 +1923,7 @@ CREATE TABLE IF NOT EXISTS usuarios (
     primer_apellido VARCHAR(50) NOT NULL,
     segundo_apellido VARCHAR(50) NOT NULL,
     correo VARCHAR(100) NOT NULL,
-    telefono VARCHAR(12) NOT NULL,
+    telefono VARCHAR(10) NOT NULL,
     contrasena TEXT DEFAULT '12345678' NOT NULL,
     temporal BOOLEAN DEFAULT TRUE NOT NULL,
     rol CHAR(1) DEFAULT 'U' REFERENCES roles (rol) NOT NULL,
@@ -2093,7 +2097,7 @@ RETURNS TABLE (
     primer_apellido VARCHAR(50),
     segundo_apellido VARCHAR(50),
     correo VARCHAR(100),
-    telefono VARCHAR(12),
+    telefono VARCHAR(10),
     contrasena TEXT,
     temporal BOOLEAN,
     rol CHAR(1),
@@ -2233,7 +2237,7 @@ CREATE OR REPLACE PROCEDURE registrar_usuario (
     _primer_apellido VARCHAR(50),
     _segundo_apellido VARCHAR(50),
     _correo VARCHAR(100),
-    _telefono VARCHAR(12),
+    _telefono VARCHAR(10),
     _rol CHAR(1) DEFAULT 'U'
 )
 LANGUAGE plpgsql
@@ -2256,7 +2260,7 @@ AS $$
 
         IF _correo !~ '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$' THEN
             RAISE EXCEPTION 'El correo no tiene un formato válido';
-        ELSIF _telefono !~ '^[0-9]{10,12}$' THEN
+        ELSIF _telefono !~ '^[0-9]{10,10}$' THEN
             RAISE EXCEPTION 'El teléfono no tiene un formato válido';
         END IF;
 
@@ -2294,8 +2298,9 @@ CREATE OR REPLACE PROCEDURE actualizar_usuario (
     _primer_apellido VARCHAR(50),
     _segundo_apellido VARCHAR(50),
     _correo VARCHAR(100),
-    _telefono VARCHAR(12),
+    _telefono VARCHAR(10),
     _contrasena TEXT,
+
     _foto_src TEXT DEFAULT NULL
 )
 LANGUAGE plpgsql
@@ -2322,7 +2327,7 @@ AS $$
 
         IF _correo !~ '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$' THEN
             RAISE EXCEPTION 'El correo no tiene un formato válido';
-        ELSIF _telefono !~ '^[0-9]{10,12}$' THEN
+        ELSIF _telefono !~ '^[0-9]{10,10}$' THEN
             RAISE EXCEPTION 'El teléfono no tiene un formato válido';
         END IF;
 
@@ -2357,6 +2362,7 @@ AS $$
             telefono = _telefono,
             contrasena = _contrasena,
             temporal = FALSE,
+            estado = _estado,
             foto_src = _foto_src
         WHERE
             id_usuario = _id_usuario;
@@ -2381,7 +2387,7 @@ AS $$
         FROM
             vst_usuarios u
         WHERE
-            u.usuario = _usuario AND u.activo = TRUE;
+            u.usuario = _usuario AND u.estado = 'Inactivo';
 
         IF total = 0 THEN
             RAISE EXCEPTION 'El usuario no existe o esta siendo utilizado';
@@ -2408,16 +2414,15 @@ AS $$
 $$;
 
 CREATE OR REPLACE PROCEDURE cambiar_rol_usuario (
-    _id_usuario INT,
+    _usuario VARCHAR(20),
     _rol CHAR(1)
 )
 LANGUAGE plpgsql
 AS $$
     DECLARE total INT;
-    DECLARE _usuario VARCHAR(50);
     BEGIN
-        IF _id_usuario IS NULL OR _id_usuario <= 0 THEN
-            RAISE EXCEPTION 'El identificador es obligatorio';
+        IF _usuario IS NULL OR TRIM(_usuario) = '' THEN
+            RAISE EXCEPTION 'El usuario es obligatorio';
         ELSIF _rol IS NULL OR TRIM(_rol) = '' THEN
             RAISE EXCEPTION 'El rol es obligatorio';
         END IF;
@@ -2427,25 +2432,18 @@ AS $$
         FROM
             vst_usuarios u
         WHERE
-            u.id_usuario = _id_usuario;
+            u.usuario = _usuario AND u.estado = 'Inactivo';
 
         IF total = 0 THEN
-            RAISE EXCEPTION 'El usuario no existe';
+            RAISE EXCEPTION 'El usuario no existe o esta siendo utilizado';
         END IF;
-
-        SELECT
-            u.usuario INTO _usuario
-        FROM
-            vst_usuarios u
-        WHERE
-            u.id_usuario = _id_usuario;
 
         UPDATE
             usuarios
         SET
             rol = _rol
         WHERE
-            id_usuario = _id_usuario AND activo = TRUE;
+            usuario = _usuario;
 
         RAISE NOTICE 'El usuario % se ha actualizado correctamente', _usuario;
     END;
@@ -2481,7 +2479,7 @@ AS $$
         SET
             estado = _estado
         WHERE
-            usuario = _usuario AND activo = TRUE;
+            usuario = _usuario;
 
         IF _estado = 'Inactivo' THEN
             RAISE NOTICE 'El usuario % ha cerrado sesión correctamente', _usuario;
@@ -2516,17 +2514,15 @@ INSERT INTO
         segundo_apellido,
         correo,
         telefono,
-        contrasena,
         rol
     )
 VALUES (
-        'Admin',
+        'admin',
         'Administrador',
         'Sistema',
         'Web',
         'admin@admin.com',
         '1234567890',
-        '12345678',
         'A'
     );
 

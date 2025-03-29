@@ -9,8 +9,8 @@ export const registerUserHandler = async (req, res) => {
     try {
         const response = await registerUser(req.body);
         res.status(201).json({ message: response.notice });
-    } catch (err) {
-        res.status(500).json({ message: `Error al registrar usuario, ${err.message}` });
+    } catch (error) {
+        res.status(500).json({ message: `Error al registrar usuario, ${error.message}` });
     }
 };
 
@@ -19,8 +19,9 @@ export const updateUserHandler = async (req, res) => {
     try {
         const response = await updateUser(req.body);
         res.status(200).json({ message: response.notice });
-    } catch (err) {
-        res.status(500).json({ message: `Error al actualizar usuario, ${err.message}` });
+        console.log(response.notice);
+    } catch (error) {
+        res.status(500).json({ message: `Error al actualizar usuario, ${error.message}` });
     }
 };
 
@@ -30,8 +31,8 @@ export const deleteUserHandler = async (req, res) => {
         const usuario = req.params.usuario;
         const response = await deleteUser(usuario);
         res.status(200).json({ message: response.notice });
-    } catch (err) {
-        res.status(500).json({ message: `Error al eliminar usuario, ${err.message}` });
+    } catch (error) {
+        res.status(500).json({ message: `Error al eliminar usuario, ${error.message}` });
     }
 };
 
@@ -49,23 +50,23 @@ export const getUserHandler = async (req, res) => {
         const formattedDateUltimaActividad = dateTZUltimaActividad.format(`${process.env.DATE_FORMAT} ${process.env.TIME_FORMAT}`);
         response.rows[0].ultima_actividad = formattedDateUltimaActividad;
         res.status(200).json(response.rows[0]);
-    } catch (err) {
-        res.status(500).json({ message: `Error al obtener usuario, ${err.message}` });
+    } catch (error) {
+        res.status(500).json({ message: `Error al obtener usuario, ${error.message}` });
     }
 };
 
 // Controlador para obtener todos los usuarios filtrados
 export const getUsersHandler = async (req, res) => {
     try {
-        const response = await getUsers(req.body);
+        const response = await getUsers(req.query);
         response.rows.forEach((usuario) => {
             const dateTZ = moment.utc(usuario.fecha_registro).tz(process.env.TIME_ZONE);
             const formattedDate = dateTZ.format(process.env.DATE_FORMAT);
             usuario.fecha_registro = formattedDate;
         });
         res.status(200).json(response.rows);
-    } catch (err) {
-        res.status(500).json({ message: `Error al obtener usuarios, ${err.message}` });
+    } catch (error) {
+        res.status(500).json({ message: `Error al obtener usuarios, ${error.message}` });
     }
 };
 
@@ -79,23 +80,23 @@ export const getActiveUsersHandler = async (req, res) => {
             usuario.ultima_actividad = formattedDate;
         });
         res.status(200).json(response.rows);
-    } catch (err) {
-        res.status(500).json({ message: `Error al obtener usuarios, ${err.message}` });
+    } catch (error) {
+        res.status(500).json({ message: `Error al obtener usuarios, ${error.message}` });
     }
 };
 
 // Controlador para obtener todos los usuarios encontrados
 export const getSearchUsersHandler = async (req, res) => {
     try {
-        const response = await searchUsers(req.body);
+        const response = await searchUsers(req.query);
         response.rows.forEach((usuario) => {
             const dateTZ = moment.utc(usuario.fecha_registro).tz(process.env.TIME_ZONE);
             const formattedDate = dateTZ.format(process.env.DATE_FORMAT);
             usuario.fecha_registro = formattedDate;
         });
         res.status(200).json(response.rows);
-    } catch (err) {
-        res.status(500).json({ message: `Error al obtener usuarios, ${err.message}` });
+    } catch (error) {
+        res.status(500).json({ message: `Error al obtener usuarios, ${error.message}` });
     }
 };
 
@@ -104,7 +105,7 @@ export const changeUserRoleHandler = async (req, res) => {
     try {
         const response = await changeUserRole(req.body);
         res.status(200).json({ message: response.notice });
-    } catch (err) {
-        res.status(500).json({ message: `Error al cambiar el rol de usuario, ${err.message}` });
+    } catch (error) {
+        res.status(500).json({ message: `Error al cambiar el rol de usuario, ${error.message}` });
     }
 };

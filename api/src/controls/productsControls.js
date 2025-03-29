@@ -60,7 +60,7 @@ export const getProductHandler = async (req, res) => {
 // Controlador para obtener los productos filtrados
 export const getProductsHandler = async (req, res) => {
     try {
-        const response = await getProducts(req.body);
+        const response = await getProducts(req.query);
 
         response.rows.forEach((producto) => {
             if (producto.ultima_compra) {
@@ -85,7 +85,7 @@ export const getProductsHandler = async (req, res) => {
 // Controlador para buscar productos
 export const searchProductsHandler = async (req, res) => {
     try {
-        const response = await searchProducts(req.body);
+        const response = await searchProducts(req.query);
 
         response.rows.forEach((producto) => {
             if (producto.ultima_compra) {

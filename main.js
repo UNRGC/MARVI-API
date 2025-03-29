@@ -80,6 +80,7 @@ app.whenReady().then(() => {
             const response = await del("login/logout");
             console.debug(response.message);
         }
+        apiProcess.kill();
         app.quit();
     });
 });

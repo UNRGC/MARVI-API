@@ -3,16 +3,16 @@ export const deniedInjections = (req, res, next) => {
 
     const excludedFields = ["dbPass", "dbServer", "password", "contrasena", "foto_src"];
 
-    const checkForInjection = (obj, excludedFields = []) => {
+    const checkForInjection = (obj, exclude = []) => {
         for (const key in obj) {
-            if (excludedFields.includes(key)) {
+            if (exclude.includes(key)) {
                 continue;
             }
 
             if (typeof obj[key] === "string" && sqlInjectionPatterns.test(obj[key])) {
                 return true;
             } else if (typeof obj[key] === "object" && obj[key] !== null) {
-                if (checkForInjection(obj[key], excludedFields)) {
+                if (checkForInjection(obj[key], exclude)) {
                     return true;
                 }
             }

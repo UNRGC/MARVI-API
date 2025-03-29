@@ -1,5 +1,5 @@
 import { client } from "../config/db.js";
-import { encryptPassword } from "../utils/encryptPassword.js";
+import bcrypt from "bcrypt";
 
 let noticeMessage = null;
 
@@ -32,8 +32,9 @@ export const updateUser = async (data) => {
         throw new Error("Faltan datos para actualizar un usuario");
     }
 
+    const hash = await bcrypt.hash(data.contrasena, 10);
     // Insertar un nuevo usuario en la base de datos
-    const response = await client.query("CALL actualizar_usuario($1::INT, $2, $3, $4, $5, $6, $7, $8, $9);", [data.id_usuario, data.usuario, data.nombre, data.primer_apellido, data.segundo_apellido, data.correo, data.telefono, await encryptPassword(data.contrasena), data.foto_src]);
+    const response = await client.query("CALL actualizar_usuario($1::INT, $2, $3, $4, $5, $6, $7, $8, $9, $10);", [data.id_usuario, data.usuario, data.nombre, data.primer_apellido, data.segundo_apellido, data.correo, data.telefono, hash, data.estado, data.foto_src]);
 
     // Agregar el mensaje de NOTICE al response
     if (noticeMessage) response.notice = noticeMessage;
@@ -98,7 +99,7 @@ export const changeUserRole = async (data) => {
     }
 
     // Insertar un nuevo usuario en la base de datos
-    const response = await client.query("CALL cambiar_rol_usuario($1::INT, $2);", [data.id_usuario, data.rol]);
+    const response = await client.query("CALL cambiar_rol_usuario($1, $2);", [data.usuario, data.rol]);
 
     // Agregar el mensaje de NOTICE al response
     if (noticeMessage) response.notice = noticeMessage;
