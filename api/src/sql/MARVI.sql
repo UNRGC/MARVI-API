@@ -444,7 +444,8 @@ CREATE TABLE IF NOT EXISTS servicios (
     nombre VARCHAR(50) NOT NULL,
     descripcion VARCHAR(100) DEFAULT NULL,
     precio DECIMAL(10, 2) NOT NULL,
-    unidad CHAR(3) DEFAULT 'N/A' REFERENCES unidades (unidad) ON DELETE SET DEFAULT NOT NULL,
+    unidad CHAR(3) DEFAULT 'N/A' REFERENCES unidades (unidad) ON DELETE
+    SET DEFAULT NOT NULL,
     activo BOOLEAN DEFAULT TRUE NOT NULL
 );
 
@@ -767,9 +768,11 @@ CREATE TABLE IF NOT EXISTS clientes (
     nombre VARCHAR(50) NOT NULL,
     primer_apellido VARCHAR(50) NOT NULL,
     segundo_apellido VARCHAR(50) DEFAULT NULL,
-    correo VARCHAR(100) DEFAULT NULL,
     telefono VARCHAR(10) DEFAULT NULL,
+    correo VARCHAR(100) DEFAULT NULL,
+    contrasena TEXT DEFAULT NULL,
     fecha_registro DATE DEFAULT CURRENT_DATE NOT NULL,
+    foto_src TEXT DEFAULT NULL,
     activo BOOLEAN DEFAULT TRUE NOT NULL
 );
 
@@ -794,21 +797,16 @@ WHERE
 -- Vistas de clientes
 
 CREATE OR REPLACE VIEW vst_clientes_activos AS
-SELECT
-    codigo,
-    CONCAT(
-        nombre,
-        ' ',
-        primer_apellido,
-        ' ',
-        segundo_apellido
-    )::VARCHAR(150) AS nombre_completo,
-    correo,
-    telefono,
-    fecha_registro
-FROM clientes
-WHERE
-    activo = TRUE;
+    SELECT
+        codigo,
+        CONCAT(nombre, ' ', primer_apellido, ' ', segundo_apellido)::VARCHAR(150) AS nombre_completo,
+        telefono,
+        correo,
+        fecha_registro
+    FROM
+        clientes
+    WHERE
+        activo = TRUE;
 
 CREATE OR REPLACE VIEW vst_clientes AS
 SELECT *
@@ -817,6 +815,120 @@ WHERE
     activo = TRUE;
 
 -- Funciones de clientes
+
+CREATE OR REPLACE FUNCTION iniciar_sesion_clientes (
+    _correo VARCHAR(100)
+)
+RETURNS TEXT
+LANGUAGE plpgsql
+AS $$
+    DECLARE total INT;
+    DECLARE contrasena TEXT;
+    BEGIN
+        IF _correo IS NULL OR TRIM(_correo) = '' THEN
+            RAISE EXCEPTION 'El correo electrónico es obligatorio';
+        END IF;
+
+        SELECT
+            COUNT(*) INTO total
+        FROM
+            vst_clientes c
+        WHERE
+            c.correo = _correo;
+
+        IF total = 0 THEN
+            RAISE EXCEPTION 'El usuario no existe';
+        END IF;
+
+        SELECT
+            c.contrasena INTO contrasena
+        FROM
+            vst_clientes c
+        WHERE
+            c.correo = _correo;
+
+        RETURN contrasena;
+    END;
+$$;
+
+CREATE OR REPLACE FUNCTION recuperar_contrasena_cliente(
+    _correo VARCHAR(100),
+    _contrasena TEXT
+)
+RETURNS TEXT
+LANGUAGE plpgsql
+AS $$
+    DECLARE total INT;
+    BEGIN
+        IF _correo IS NULL OR TRIM(_correo) = '' THEN
+            RAISE EXCEPTION 'El correo electrónico es obligatorio';
+        ELSIF _contrasena IS NULL OR TRIM(_contrasena) = '' THEN
+            RAISE EXCEPTION 'La nueva contraseña es obligatoria';
+        END IF;
+
+        SELECT
+            COUNT(*) INTO total
+        FROM
+            vst_clientes c
+        WHERE
+            c.correo = _correo;
+
+        IF total = 0 THEN
+            RAISE EXCEPTION 'El usuario no existe';
+        END IF;
+
+        UPDATE clientes
+        SET contrasena = _contrasena
+        WHERE correo = _correo;
+
+        RETURN 'Contraseña actualizada correctamente';
+    END;
+$$;
+
+CREATE OR REPLACE FUNCTION consultar_correo_cliente(
+    _correo VARCHAR(100)
+)
+RETURNS TABLE (
+    id_cliente INT,
+    codigo VARCHAR(10),
+    nombre VARCHAR(50),
+    primer_apellido VARCHAR(50),
+    segundo_apellido VARCHAR(50),
+    telefono VARCHAR(10),
+    correo VARCHAR(100),
+    contrasena TEXT,
+    fecha_registro DATE,
+    foto_src TEXT,
+    activo BOOLEAN
+)
+LANGUAGE plpgsql
+AS $$
+    DECLARE total INT;
+    BEGIN
+        IF _correo IS NULL OR TRIM(_correo) = '' THEN
+            RAISE EXCEPTION 'El correo electrónico del cliente es requerido';
+        END IF;
+
+        SELECT
+            COUNT(*) INTO total
+        FROM
+            vst_clientes c
+        WHERE
+            c.correo = _correo;
+
+        IF total = 0 THEN
+            RAISE EXCEPTION 'El correo electrónico no existe';
+        END IF;
+
+        RETURN QUERY
+        SELECT
+            *
+        FROM
+            vst_clientes c
+        WHERE
+            c.correo = _correo;
+    END;
+$$;
 
 CREATE OR REPLACE FUNCTION consultar_cliente(
     _codigo VARCHAR(10)
@@ -827,9 +939,11 @@ RETURNS TABLE (
     nombre VARCHAR(50),
     primer_apellido VARCHAR(50),
     segundo_apellido VARCHAR(50),
-    correo VARCHAR(100),
     telefono VARCHAR(10),
+    correo VARCHAR(100),
+    contrasena TEXT,
     fecha_registro DATE,
+    foto_src TEXT,
     activo BOOLEAN
 )
 LANGUAGE plpgsql
@@ -845,7 +959,7 @@ AS $$
         FROM
             vst_clientes c
         WHERE
-            c.codigo = UPPER(_codigo);
+            c.codigo = _codigo;
 
         IF total = 0 THEN
             RAISE EXCEPTION 'El cliente no existe';
@@ -857,7 +971,7 @@ AS $$
         FROM
             vst_clientes c
         WHERE
-            c.codigo = UPPER(_codigo);
+            c.codigo = _codigo;
     END;
 $$;
 
@@ -870,8 +984,8 @@ RETURNS TABLE (
     total BIGINT,
     codigo VARCHAR(10),
     nombre_completo VARCHAR(150),
-    correo VARCHAR(100),
     telefono VARCHAR(10),
+    correo VARCHAR(100),
     fecha_registro DATE
 )
 LANGUAGE plpgsql
@@ -889,8 +1003,8 @@ AS $$
         WHERE
             c.codigo ILIKE '%' || _busqueda || '%'
             OR c.nombre_completo ILIKE '%' || _busqueda || '%'
-            OR c.correo ILIKE '%' || _busqueda || '%'
             OR c.telefono ILIKE '%' || _busqueda || '%'
+            OR c.correo ILIKE '%' || _busqueda || '%'
             OR c.fecha_registro::TEXT ILIKE '%' || _busqueda || '%';
 
         RETURN QUERY
@@ -902,8 +1016,8 @@ AS $$
         WHERE
             c.codigo ILIKE '%' || _busqueda || '%'
             OR c.nombre_completo ILIKE '%' || _busqueda || '%'
-            OR c.correo ILIKE '%' || _busqueda || '%'
             OR c.telefono ILIKE '%' || _busqueda || '%'
+            OR c.correo ILIKE '%' || _busqueda || '%'
             OR c.fecha_registro::TEXT ILIKE '%' || _busqueda || '%'
         LIMIT _limit
         OFFSET _offset;
@@ -920,8 +1034,8 @@ RETURNS TABLE (
     total BIGINT,
     codigo VARCHAR(10),
     nombre_completo VARCHAR(150),
-    correo VARCHAR(100),
     telefono VARCHAR(10),
+    correo VARCHAR(100),
     fecha_registro DATE
 )
 LANGUAGE plpgsql
@@ -957,8 +1071,9 @@ CREATE OR REPLACE PROCEDURE registrar_cliente(
     _nombre VARCHAR(50),
     _primer_apellido VARCHAR(50),
     _segundo_apellido VARCHAR(50) DEFAULT NULL,
+    _telefono VARCHAR(10) DEFAULT NULL,
     _correo VARCHAR(100) DEFAULT NULL,
-    _telefono VARCHAR(10) DEFAULT NULL
+    _contrasena TEXT DEFAULT NULL
 )
 LANGUAGE plpgsql
 AS $$
@@ -974,17 +1089,28 @@ AS $$
             _segundo_apellido := NULL;
         END IF;
 
+        IF _telefono IS NOT NULL AND TRIM(_telefono) <> '' THEN
+            IF _telefono !~ '^[0-9]{10}$' THEN
+                RAISE EXCEPTION 'El teléfono del cliente no tiene un formato válido';
+            END IF;
+        ELSE
+            _telefono := NULL;
+        END IF;
+
         IF _correo IS NOT NULL AND TRIM(_correo) <> '' THEN
             IF _correo !~ '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$' THEN
                 RAISE EXCEPTION 'El correo del cliente no tiene un formato válido';
             END IF;
-        ELSIF _telefono IS NOT NULL AND TRIM(_telefono) <> '' THEN
-            IF _telefono !~ '^[0-9]{10,10}$' THEN
-                RAISE EXCEPTION 'El teléfono del cliente no tiene un formato válido';
-            END IF;
         ELSE
             _correo := NULL;
-            _telefono := NULL;
+        END IF;
+
+        IF _contrasena IS NOT NULL AND TRIM(_contrasena) <> '' THEN
+            IF LENGTH(_contrasena) < 8 THEN
+                RAISE EXCEPTION 'La contraseña debe tener al menos 8 caracteres';
+            END IF;
+        ELSE
+            _contrasena := NULL;
         END IF;
 
         SELECT
@@ -992,23 +1118,24 @@ AS $$
         FROM
             vst_clientes c
         WHERE
-            c.codigo = UPPER(_codigo)
-            OR c.correo = _correo
-            OR c.telefono = _telefono;
+            c.codigo = _codigo
+            OR c.telefono = _telefono
+            OR c.correo = _correo;
 
         IF total > 0 THEN
-            RAISE EXCEPTION 'El código, correo o teléfono del cliente ya se encuentra registrado';
+            RAISE EXCEPTION 'El usuario, correo o teléfono ya existen';
         END IF;
 
         INSERT INTO
-            clientes (codigo, nombre, primer_apellido, segundo_apellido, correo, telefono)
+            clientes (codigo, nombre, primer_apellido, segundo_apellido, telefono, correo, contrasena)
         VALUES (
-            UPPER(_codigo),
+            _codigo,
             _nombre,
             _primer_apellido,
             _segundo_apellido,
+            _telefono,
             _correo,
-            _telefono
+            _contrasena
         );
 
         RAISE NOTICE 'El cliente % se ha registrado correctamente', CONCAT(_nombre, ' ', _primer_apellido);
@@ -1021,8 +1148,9 @@ CREATE OR REPLACE PROCEDURE actualizar_cliente(
     _nombre VARCHAR(50),
     _primer_apellido VARCHAR(50),
     _segundo_apellido VARCHAR(50) DEFAULT NULL,
+    _telefono VARCHAR(10) DEFAULT NULL,
     _correo VARCHAR(100) DEFAULT NULL,
-    _telefono VARCHAR(10) DEFAULT NULL
+    _contrasena TEXT DEFAULT NULL
 )
 LANGUAGE plpgsql
 AS $$
@@ -1040,17 +1168,28 @@ AS $$
             _segundo_apellido := NULL;
         END IF;
 
+        IF _telefono IS NOT NULL AND TRIM(_telefono) <> '' THEN
+            IF _telefono !~ '^[0-9]{10,12}$' THEN
+                RAISE EXCEPTION 'El teléfono del cliente no tiene un formato válido';
+            END IF;
+        ELSE
+            _telefono := NULL;
+        END IF;
+
         IF _correo IS NOT NULL AND TRIM(_correo) <> '' THEN
             IF _correo !~ '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$' THEN
                 RAISE EXCEPTION 'El correo del cliente no tiene un formato válido';
             END IF;
-        ELSIF _telefono IS NOT NULL AND TRIM(_telefono) <> '' THEN
-            IF _telefono !~ '^[0-9]{10,10}$' THEN
-                RAISE EXCEPTION 'El teléfono del cliente no tiene un formato válido';
-            END IF;
         ELSE
             _correo := NULL;
-            _telefono := NULL;
+        END IF;
+
+        IF _contrasena IS NOT NULL AND TRIM(_contrasena) <> '' THEN
+            IF LENGTH(_contrasena) < 8 THEN
+                RAISE EXCEPTION 'La contraseña debe tener al menos 8 caracteres';
+            END IF;
+        ELSE
+            _contrasena := NULL;
         END IF;
 
         SELECT
@@ -1069,19 +1208,20 @@ AS $$
         FROM
             vst_clientes c
         WHERE
-            c.codigo = UPPER(_codigo) AND c.id_cliente <> _id_cliente;
+            c.codigo = _codigo AND c.id_cliente <> _id_cliente;
         IF total > 0 THEN
             RAISE EXCEPTION 'El código del cliente ya se encuentra registrado';
         END IF;
 
         UPDATE clientes
         SET
-            codigo = UPPER(_codigo),
+            codigo = _codigo,
             nombre = _nombre,
             primer_apellido = _primer_apellido,
             segundo_apellido = _segundo_apellido,
+            telefono = _telefono,
             correo = _correo,
-            telefono = _telefono
+            contrasena = _contrasena
         WHERE
             id_cliente = _id_cliente;
 
@@ -1106,7 +1246,7 @@ AS $$
         FROM
             vst_clientes c
         WHERE
-            c.codigo = UPPER(_codigo);
+            c.codigo = _codigo;
 
         IF total = 0 THEN
             RAISE EXCEPTION 'El cliente no existe';
@@ -1117,14 +1257,14 @@ AS $$
         FROM
             vst_clientes c
         WHERE
-            c.codigo = UPPER(_codigo);
+            c.codigo = _codigo;
 
         UPDATE
             clientes
         SET
             activo = FALSE
         WHERE
-            codigo = UPPER(_codigo);
+            codigo = _codigo;
 
         RAISE NOTICE 'El cliente % se ha eliminado correctamente', _nombre_cliente;
     END;
@@ -1152,9 +1292,11 @@ CREATE TABLE IF NOT EXISTS productos (
     nombre VARCHAR(50) NOT NULL,
     descripcion VARCHAR(100) DEFAULT NULL,
     precio DECIMAL(10, 2) NOT NULL,
-    unidad CHAR(3) DEFAULT 'N/A' REFERENCES unidades (unidad) ON DELETE SET DEFAULT NOT NULL,
+    unidad CHAR(3) DEFAULT 'N/A' REFERENCES unidades (unidad) ON DELETE
+    SET DEFAULT NOT NULL,
     recordatorio BOOLEAN DEFAULT FALSE NOT NULL,
-    frecuencia CHAR(3) DEFAULT 'N/A' REFERENCES frecuencia_compras (frecuencia) ON DELETE SET DEFAULT NOT NULL,
+    frecuencia CHAR(3) DEFAULT 'N/A' REFERENCES frecuencia_compras (frecuencia) ON DELETE
+    SET DEFAULT NOT NULL,
     ultima_compra DATE DEFAULT NULL,
     proxima_compra DATE DEFAULT NULL,
     activo BOOLEAN DEFAULT TRUE NOT NULL
@@ -2006,7 +2148,7 @@ WHERE
 
 -- Funciones de usuarios
 
-CREATE OR REPLACE FUNCTION iniciar_sesion (
+CREATE OR REPLACE FUNCTION iniciar_sesion_usuarios (
     _usuario VARCHAR(20)
 )
 RETURNS TABLE(
@@ -2045,7 +2187,7 @@ AS $$
     END;
 $$;
 
-CREATE OR REPLACE FUNCTION recuperar_contrasena (
+CREATE OR REPLACE FUNCTION recuperar_contrasena_usuario (
     _correo VARCHAR(100)
 )
 RETURNS TABLE (
@@ -2300,7 +2442,7 @@ CREATE OR REPLACE PROCEDURE actualizar_usuario (
     _correo VARCHAR(100),
     _telefono VARCHAR(10),
     _contrasena TEXT,
-
+    _estado VARCHAR(8),
     _foto_src TEXT DEFAULT NULL
 )
 LANGUAGE plpgsql

@@ -10,7 +10,7 @@ client.on("notice", (msg) => {
 // Función para iniciar sesión
 export const login = async (usuario) => {
     // Iniciar sesión en la base de datos
-    const response = await client.query("SELECT * FROM iniciar_sesion($1);", [usuario]);
+    const response = await client.query("SELECT * FROM iniciar_sesion_usuarios($1);", [usuario]);
 
     // Retornar
     return response;
@@ -36,7 +36,7 @@ export const changeState = async (data) => {
 // Función para recuperar la contraseña
 export const forgotPassword = async (correo) => {
     // Recuperar la contraseña en la base de datos
-    const response = await client.query("SELECT * FROM recuperar_contrasena($1);", [correo]);
+    const response = await client.query("SELECT * FROM recuperar_contrasena_usuario($1);", [correo]);
 
     // Retornar
     return response;

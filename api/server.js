@@ -2,7 +2,9 @@ import express from "express";
 import cors from "cors";
 import envRoutes from "./src/routes/envRoutes.js";
 import loginRoutes from "./src/routes/loginRoutes.js";
+import loginClientsRoutes from "./src/routes/loginClientsRoutes.js";
 import usersRoutes from "./src/routes/usersRoutes.js";
+import clientsRoutes from "./src/routes/clientsRoutes.js";
 import referencesRoutes from "./src/routes/referencesRoutes.js";
 import productsRoutes from "./src/routes/productsRoutes.js";
 import servicesRoutes from "./src/routes/servicesRoutes.js";
@@ -53,8 +55,9 @@ app.use((err, req, res, next) => {
 
 // Rutas
 app.use("/env", envRoutes);
-app.use("/login", loginRoutes);
+app.use("/login", loginRoutes, loginClientsRoutes);
 app.use("/users", usersRoutes);
+app.use("/clients", clientsRoutes);
 app.use("/references", referencesRoutes);
 app.use("/products", productsRoutes);
 app.use("/services", servicesRoutes);
