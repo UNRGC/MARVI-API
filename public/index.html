@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta http-equiv="Content-Security-Policy" content="script-src 'self';" />
+        <link rel="icon" type="image/x-icon" href="./img/Icon.ico" />
+        <title>MARVI server</title>
+        <!-- Iconos de bootstrap -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+        <link rel="stylesheet" href="./css/index.css" />
+    </head>
+    <body>
+        <main>
+            <header>
+                <img src="./img/Logo.svg" alt="MARVI Logo" width="120" />
+                <nav>
+                    <a href="#connection" id="connection"><i class="bi bi-gear"></i> Ajustes</a>
+                    <a href="#console" id="console"><i class="bi bi-terminal"></i> Consola</a>
+                    <a href="#users" id="users"><i class="bi bi-people"></i> Usuarios</a>
+                </nav>
+                <nav>
+                    <a type="button" id="exit"><i class="bi bi-door-open"></i> Salir</a>
+                    <button type="button" id="theme" class="secondary"><i class="bi bi-cloud-sun"></i></button>
+                </nav>
+            </header>
+            <section id="panel">
+                <form class="connection hidden">
+                    <div class="connection-col">
+                        <p><i class="bi bi-database"></i> Conexión con la base de datos</p>
+                        <label for="user">Nombre de usuario de la base de datos:</label>
+                        <input type="text" name="Usuario de la base de datos" id="user" placeholder="Ingresa el usuario de la base de datos" autocomplete="off" aria-autocomplete="none" required />
+                        <label for="pass">Contraseña del usuario:</label>
+                        <input type="password" name="Contraseña del usuario" id="pass" placeholder="Ingresa la contraseña del usuario" autocomplete="off" aria-autocomplete="none" required />
+                        <label for="server">Servidor de la base de datos:</label>
+                        <input type="text" name="Servidor de la base de datos" id="server" placeholder="Ingresa el servidor de la base de datos" autocomplete="off" aria-autocomplete="none" required />
+                        <label for="database">Nombre de la base de datos:</label>
+                        <input type="text" name="Base de datos" id="database" placeholder="Ingresa el nombre de la base de datos" autocomplete="off" aria-autocomplete="none" required />
+                    </div>
+                    <div class="connection-col">
+                        <p><i class="bi bi-envelope-at"></i> Conexión al servicio de correo electrónico</p>
+                        <label for="service">Servicio de correo electrónico:</label>
+                        <select name="Servicio de correo electrónico" id="service" required>
+                            <option value="gmail">Gmail</option>
+                            <option value="outlook">Outlook / Hotmail</option>
+                            <option value="yahoo">Yahoo</option>
+                        </select>
+                        <label for="email">Correo electrónico:</label>
+                        <input type="email" name="Correo electrónico" id="email" placeholder="Ingresa el correo electrónico" autocomplete="off" aria-autocomplete="none" required />
+                        <label for="password">Contraseña segura:</label>
+                        <input type="password" name="Contraseña segura" id="password" placeholder="Ingresa la contraseña del correo electrónico" autocomplete="off" aria-autocomplete="none" required />
+                    </div>
+                    <div class="connection-col">
+                        <p><i class="bi bi-clock"></i> Fecha y hora del sistema</p>
+                        <label for="service">Zona horaria:</label>
+                        <input type="text" name="Zona horaria" id="timeZone" placeholder="Ingresa la zona horaria" autocomplete="off" aria-autocomplete="none" required />
+                        <label for="email">Formato de la fecha:</label>
+                        <input type="text" name="Formato de fecha" id="date" placeholder="Ingresa el formato de fecha" autocomplete="off" aria-autocomplete="none" required />
+                    </div>
+
+                    <div class="button-group">
+                        <button type="button" class="secondary" id="discard" disabled><i class="bi bi-trash"></i> Descartar</button>
+                        <button type="submit" class="primary" id="save" disabled><i class="bi bi-floppy"></i> Guardar</button>
+                    </div>
+                </form>
+                <section class="console">
+                    <div class="console-col">
+                        <p><i class="bi bi-terminal"></i> Salida del servidor</p>
+                        <pre id="output"></pre>
+                    </div>
+
+                    <div class="button-group">
+                        <button class="primary" id="clean"><i class="bi bi-arrow-repeat"></i> Limpiar consola</button>
+                    </div>
+                </section>
+                <section class="users hidden">
+                    <div class="users-col">
+                        <p><i class="bi bi-people"></i> Usuarios en el sistema</p>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Usuario</th>
+                                    <th>Nombre</th>
+                                    <th>Rol</th>
+                                    <th>Ultima actividad</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tbody"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="button-group">
+                        <button class="primary" id="close"><i class="bi bi-person-slash"></i> Cerrar sesiones</button>
+                    </div>
+                </section>
+            </section>
+        </main>
+
+        <!-- Script del index -->
+        <script src="./js/index.js" type="module"></script>
+    </body>
+</html>
