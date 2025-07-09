@@ -1,12 +1,5 @@
-import {
-    deleteClient,
-    getClient,
-    getClients,
-    registerClient,
-    searchClients,
-    updateClient
-} from "../model/clientsModel.js";
-import {config} from "dotenv";
+import { deleteClient, getClient, getClientByEmail, getClients, registerClient, searchClients, updateClient } from "../model/clientsModel.js";
+import { config } from "dotenv";
 import moment from "moment-timezone";
 
 config();
@@ -55,6 +48,21 @@ export const getClientHandler = async (req, res) => {
         res.status(200).json(response.rows[0]);
     } catch (error) {
         res.status(500).json({ message: `Error al obtener cliente, ${error.message}` });
+    }
+};
+
+// Controlador para obtener un cliente por correo electrónico
+export const getClientByEmailHandler = async (req, res) => {
+    try {
+        const correo = req.params.correo;
+        const response = await getClientByEmail(correo);
+
+        const dateTZFechaRegistro = moment.utc(response.rows[0].fecha_registro).tz(process.env.TIME_ZONE);
+        response.rows[0].fecha_registro = dateTZFechaRegistro.format(process.env.DATE_FORMAT);
+
+        res.status(200).json(response.rows[0]);
+    } catch (error) {
+        res.status(500).json({ message: `Error al obtener cliente por correo, ${error.message}` });
     }
 };
 

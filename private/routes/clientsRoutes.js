@@ -17,6 +17,8 @@ router.get("/", deniedInjections, getClientsHandler);
 router.get("/search", deniedInjections, getSearchClientsHandler);
 // Ruta para obtener clientes
 router.get("/:cliente", deniedInjections, getClientHandler);
+// Ruta para obtener un cliente por correo electrónico
+router.get("/email/:correo", deniedInjections, getClientByEmailHandler);
 
 // Exporta el router
 export default router;
