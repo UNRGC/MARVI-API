@@ -1,6 +1,6 @@
 import express from "express";
 import { deniedInjections } from "../utils/security.js";
-import { registerClientHandler, updateClientHandler, deleteClientHandler, getClientHandler, getClientsHandler, getSearchClientsHandler } from "../controller/clientsController.js";
+import { registerClientHandler, getClientByEmailHandler, updateClientHandler, deleteClientHandler, getClientHandler, getClientsHandler, getSearchClientsHandler } from "../controller/clientsController.js";
 
 // Crea nueva instancia de un router de express
 const router = express.Router();
@@ -17,6 +17,8 @@ router.get("/", deniedInjections, getClientsHandler);
 router.get("/search", deniedInjections, getSearchClientsHandler);
 // Ruta para obtener clientes
 router.get("/:cliente", deniedInjections, getClientHandler);
+// Ruta para obtener un cliente por correo electrónico
+router.get("/email/:correo", deniedInjections, getClientByEmailHandler);
 
 // Exporta el router
 export default router;
