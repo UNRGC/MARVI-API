@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS roles
     nombre VARCHAR(14) NOT NULL
 );
 
--- Indices de roles
+-- Índices de roles
 
 CREATE INDEX idx_rol_nombre ON roles (nombre);
 
@@ -27,7 +27,7 @@ VALUES ('A', 'Administrador'),
        ('U', 'Usuario'),
        ('I', 'Invitado');
 
--- Tabla estados
+-- Tabla de estados
 
 CREATE TABLE IF NOT EXISTS estados_pedidos
 (
@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS estados_pedidos
     nombre VARCHAR(14) NOT NULL
 );
 
--- Indices de estados
+-- Índices de estados
 
 CREATE INDEX idx_estado_pedido_nombre ON estados_pedidos (nombre);
 
@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS unidades
     nombre VARCHAR(50) NOT NULL
 );
 
--- Indices de unidades
+-- Índices de unidades
 
 CREATE INDEX idx_unidad_nombre ON unidades (nombre);
 
@@ -131,7 +131,7 @@ BEGIN
     WHERE u.unidad = UPPER(_unidad);
 
     IF total > 0 THEN
-        RAISE EXCEPTION 'La unidad ya existe';
+        RAISE EXCEPTION 'La unidad ya esta registrada';
     END IF;
 
     INSERT INTO unidades (unidad, nombre)
@@ -237,7 +237,7 @@ CREATE TABLE IF NOT EXISTS frecuencia_compras
     dias        INT         NOT NULL
 );
 
--- Indices de frecuencia_compras
+-- Índices de frecuencia_compras
 
 CREATE INDEX idx_frecuencia_compras_nombre ON frecuencia_compras (nombre);
 
@@ -317,7 +317,7 @@ BEGIN
     WHERE f.frecuencia = UPPER(_frecuencia);
 
     IF total > 0 THEN
-        RAISE EXCEPTION 'La frecuencia de compra ya existe';
+        RAISE EXCEPTION 'La frecuencia de compra ya esta registrada';
     END IF;
 
     INSERT INTO frecuencia_compras (frecuencia, nombre, descripcion, dias)
@@ -437,7 +437,7 @@ CREATE TABLE IF NOT EXISTS servicios
     activo      BOOLEAN      DEFAULT TRUE                                                     NOT NULL
 );
 
--- Indices de servicios
+-- Índices de servicios
 
 CREATE INDEX idx_servicio_busqueda ON servicios (
                                                  codigo,
@@ -623,7 +623,7 @@ BEGIN
     WHERE s.codigo = UPPER(_codigo);
 
     IF total > 0 THEN
-        RAISE EXCEPTION 'El código del servicio ya existe';
+        RAISE EXCEPTION 'El código del servicio ya esta registrado';
     END IF;
 
     INSERT INTO servicios (codigo, nombre, descripcion, precio, unidad)
@@ -681,7 +681,7 @@ BEGIN
       AND s.id_servicio <> _id_servicio;
 
     IF total > 0 THEN
-        RAISE EXCEPTION 'El código del servicio ya existe';
+        RAISE EXCEPTION 'El código del servicio ya esta registrado';
     END IF;
 
     UPDATE servicios
@@ -750,7 +750,7 @@ CREATE TABLE IF NOT EXISTS clientes
     activo           BOOLEAN      DEFAULT TRUE         NOT NULL
 );
 
--- Indices de clientes
+-- Índices de clientes
 
 CREATE INDEX idx_cliente_busqueda ON clientes (codigo, nombre, primer_apellido, segundo_apellido, correo, telefono,
                                                fecha_registro);
@@ -892,7 +892,7 @@ DECLARE
     total INT;
 BEGIN
     IF _codigo IS NULL OR TRIM(_codigo) = '' THEN
-        RAISE EXCEPTION 'El codigo del cliente es requerido';
+        RAISE EXCEPTION 'El código del cliente es requerido';
     END IF;
 
     SELECT COUNT(*)
@@ -901,7 +901,7 @@ BEGIN
     WHERE c.codigo = _codigo;
 
     IF total = 0 THEN
-        RAISE EXCEPTION 'El codigo no existe';
+        RAISE EXCEPTION 'El código no existe';
     END IF;
 
     RETURN QUERY
@@ -1069,9 +1069,18 @@ BEGIN
         _segundo_apellido := NULL;
     END IF;
 
+    SELECT COUNT(*) INTO total FROM vst_clientes c WHERE c.codigo = _codigo;
+    IF total > 0 THEN
+        RAISE EXCEPTION 'El código ya esta registrado';
+    END IF;
+
     IF _telefono IS NOT NULL AND TRIM(_telefono) <> '' THEN
         IF _telefono !~ '^[0-9]{10}$' THEN
-            RAISE EXCEPTION 'El teléfono del cliente no tiene un formato válido';
+            RAISE EXCEPTION 'El número de teléfono del cliente no tiene un formato válido';
+        END IF;
+        SELECT COUNT(*) INTO total FROM vst_clientes c WHERE c.telefono = _telefono;
+        IF total > 0 THEN
+            RAISE EXCEPTION 'El número de teléfono ya esta registrado';
         END IF;
     ELSE
         _telefono := NULL;
@@ -1079,7 +1088,11 @@ BEGIN
 
     IF _correo IS NOT NULL AND TRIM(_correo) <> '' THEN
         IF _correo !~ '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$' THEN
-            RAISE EXCEPTION 'El correo del cliente no tiene un formato válido';
+            RAISE EXCEPTION 'El correo electrónico del cliente no tiene un formato válido';
+        END IF;
+        SELECT COUNT(*) INTO total FROM vst_clientes c WHERE c.correo = _correo;
+        IF total > 0 THEN
+            RAISE EXCEPTION 'El correo electrónico ya esta registrado';
         END IF;
     ELSE
         _correo := NULL;
@@ -1091,17 +1104,6 @@ BEGIN
         END IF;
     ELSE
         _contrasena := NULL;
-    END IF;
-
-    SELECT COUNT(*)
-    INTO total
-    FROM vst_clientes c
-    WHERE c.codigo = _codigo
-       OR c.telefono = _telefono
-       OR c.correo = _correo;
-
-    IF total > 0 THEN
-        RAISE EXCEPTION 'El usuario, teléfono o correo ya existen';
     END IF;
 
     INSERT INTO clientes (codigo, nombre, primer_apellido, segundo_apellido, telefono, correo, contrasena)
@@ -1145,30 +1147,6 @@ BEGIN
         _segundo_apellido := NULL;
     END IF;
 
-    IF _telefono IS NOT NULL AND TRIM(_telefono) <> '' THEN
-        IF _telefono !~ '^[0-9]{10,12}$' THEN
-            RAISE EXCEPTION 'El teléfono del cliente no tiene un formato válido';
-        END IF;
-    ELSE
-        _telefono := NULL;
-    END IF;
-
-    IF _correo IS NOT NULL AND TRIM(_correo) <> '' THEN
-        IF _correo !~ '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$' THEN
-            RAISE EXCEPTION 'El correo del cliente no tiene un formato válido';
-        END IF;
-    ELSE
-        _correo := NULL;
-    END IF;
-
-    IF _contrasena IS NOT NULL AND TRIM(_contrasena) <> '' THEN
-        IF LENGTH(_contrasena) < 8 THEN
-            RAISE EXCEPTION 'La contraseña debe tener al menos 8 caracteres';
-        END IF;
-    ELSE
-        _contrasena := NULL;
-    END IF;
-
     SELECT COUNT(*)
     INTO total
     FROM vst_clientes c
@@ -1185,6 +1163,38 @@ BEGIN
       AND c.id_cliente <> _id_cliente;
     IF total > 0 THEN
         RAISE EXCEPTION 'El código del cliente ya se encuentra registrado';
+    END IF;
+
+    IF _telefono IS NOT NULL AND TRIM(_telefono) <> '' THEN
+        IF _telefono !~ '^[0-9]{10,12}$' THEN
+            RAISE EXCEPTION 'El número de teléfono del cliente no tiene un formato válido';
+        END IF;
+        SELECT COUNT(*) INTO total FROM vst_clientes c WHERE c.telefono = _telefono AND c.id_cliente <> _id_cliente;
+        IF total > 0 THEN
+            RAISE EXCEPTION 'El número de teléfono ya esta registrado';
+        END IF;
+    ELSE
+        _telefono := NULL;
+    END IF;
+
+    IF _correo IS NOT NULL AND TRIM(_correo) <> '' THEN
+        IF _correo !~ '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$' THEN
+            RAISE EXCEPTION 'El correo electrónico del cliente no tiene un formato válido';
+        END IF;
+        SELECT COUNT(*) INTO total FROM vst_clientes c WHERE c.correo = _correo AND c.id_cliente <> _id_cliente;
+        IF total > 0 THEN
+            RAISE EXCEPTION 'El correo electrónico ya esta registrado';
+        END IF;
+    ELSE
+        _correo := NULL;
+    END IF;
+
+    IF _contrasena IS NOT NULL AND TRIM(_contrasena) <> '' THEN
+        IF LENGTH(_contrasena) < 8 THEN
+            RAISE EXCEPTION 'La contraseña debe tener al menos 8 caracteres';
+        END IF;
+    ELSE
+        _contrasena := NULL;
     END IF;
 
     UPDATE clientes
@@ -1264,7 +1274,7 @@ CREATE TABLE IF NOT EXISTS productos
     activo         BOOLEAN      DEFAULT TRUE                                                                   NOT NULL
 );
 
--- Indices de productos
+-- Índices de productos
 
 CREATE INDEX idx_producto_busqueda ON productos (
                                                  codigo,
@@ -1483,7 +1493,7 @@ BEGIN
     WHERE p.codigo = UPPER(_codigo);
 
     IF total > 0 THEN
-        RAISE EXCEPTION 'El producto ya existe';
+        RAISE EXCEPTION 'El producto ya esta registrado';
     END IF;
 
     INSERT INTO productos (codigo, nombre, descripcion, precio, unidad, recordatorio, frecuencia)
@@ -1551,7 +1561,7 @@ BEGIN
       AND p.id_producto <> _id_producto;
 
     IF total > 0 THEN
-        RAISE EXCEPTION 'El código del producto ya existe';
+        RAISE EXCEPTION 'El código del producto ya esta registrado';
     END IF;
 
     UPDATE productos
@@ -1659,7 +1669,7 @@ CREATE TABLE IF NOT EXISTS proveedores
     activo         BOOLEAN      DEFAULT TRUE         NOT NULL
 );
 
--- Indices de proveedores
+-- Índices de proveedores
 
 CREATE INDEX idx_proveedor_busqueda ON proveedores (
                                                     codigo,
@@ -1846,11 +1856,11 @@ BEGIN
 
     IF _correo IS NOT NULL AND TRIM(_correo) <> '' THEN
         IF _correo !~ '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$' THEN
-            RAISE EXCEPTION 'El correo del proveedor no tiene un formato válido';
+            RAISE EXCEPTION 'El correo electrónico del proveedor no tiene un formato válido';
         END IF;
     ELSIF _telefono IS NOT NULL AND TRIM(_telefono) <> '' THEN
         IF _telefono !~ '^[0-9]{10,10}$' THEN
-            RAISE EXCEPTION 'El teléfono del proveedor no tiene un formato válido';
+            RAISE EXCEPTION 'El número de teléfono del proveedor no tiene un formato válido';
         END IF;
     ELSE
         _correo := NULL;
@@ -1863,7 +1873,7 @@ BEGIN
     WHERE p.codigo = UPPER(_codigo);
 
     IF total > 0 THEN
-        RAISE EXCEPTION 'El código del proveedor ya existe';
+        RAISE EXCEPTION 'El código del proveedor ya esta registrado';
     END IF;
 
     INSERT INTO proveedores (codigo, nombre, correo, telefono, direccion)
@@ -1903,11 +1913,11 @@ BEGIN
 
     IF _correo IS NOT NULL AND TRIM(_correo) <> '' THEN
         IF _correo !~ '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$' THEN
-            RAISE EXCEPTION 'El correo del proveedor no tiene un formato válido';
+            RAISE EXCEPTION 'El correo electrónico del proveedor no tiene un formato válido';
         END IF;
     ELSIF _telefono IS NOT NULL AND TRIM(_telefono) <> '' THEN
         IF _telefono !~ '^[0-9]{10,10}$' THEN
-            RAISE EXCEPTION 'El teléfono del proveedor no tiene un formato válido';
+            RAISE EXCEPTION 'El número de teléfono del proveedor no tiene un formato válido';
         END IF;
     ELSE
         _correo := NULL;
@@ -1930,7 +1940,7 @@ BEGIN
       AND p.id_proveedor <> _id_proveedor;
 
     IF total > 0 THEN
-        RAISE EXCEPTION 'El código del proveedor ya existe';
+        RAISE EXCEPTION 'El código del proveedor ya esta registrado';
     END IF;
 
     UPDATE proveedores
@@ -2122,7 +2132,7 @@ DECLARE
     DECLARE _temporal VARCHAR(8);
 BEGIN
     IF _correo IS NULL OR TRIM(_correo) = '' THEN
-        RAISE EXCEPTION 'El correo es obligatorio';
+        RAISE EXCEPTION 'El correo electrónico es obligatorio';
     END IF;
 
     SELECT COUNT(*)
@@ -2132,7 +2142,7 @@ BEGIN
       AND u.estado = 'Inactivo';
 
     IF total = 0 THEN
-        RAISE EXCEPTION 'El correo no existe';
+        RAISE EXCEPTION 'El correo electrónico no existe';
     END IF;
 
     SELECT SUBSTR(MD5(RANDOM()::TEXT), 0, 9)
@@ -2314,26 +2324,30 @@ BEGIN
     ELSIF _segundo_apellido IS NULL OR TRIM(_segundo_apellido) = '' THEN
         RAISE EXCEPTION 'El segundo apellido es obligatorio';
     ELSIF _correo IS NULL OR TRIM(_correo) = '' THEN
-        RAISE EXCEPTION 'El correo es obligatorio';
+        RAISE EXCEPTION 'El correo electrónico es obligatorio';
     ELSIF _telefono IS NULL OR TRIM(_telefono) = '' THEN
-        RAISE EXCEPTION 'El teléfono es obligatorio';
+        RAISE EXCEPTION 'El número de teléfono es obligatorio';
+    END IF;
+
+    SELECT COUNT(*) INTO total FROM vst_usuarios u WHERE u.usuario = _usuario;
+    IF total > 0 THEN
+        RAISE EXCEPTION 'El usuario ya esta registrado';
     END IF;
 
     IF _correo !~ '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$' THEN
-        RAISE EXCEPTION 'El correo no tiene un formato válido';
+        RAISE EXCEPTION 'El correo electrónico no tiene un formato válido';
     ELSIF _telefono !~ '^[0-9]{10,10}$' THEN
-        RAISE EXCEPTION 'El teléfono no tiene un formato válido';
+        RAISE EXCEPTION 'El número de teléfono no tiene un formato válido';
     END IF;
 
-    SELECT COUNT(*)
-    INTO total
-    FROM vst_usuarios u
-    WHERE u.usuario = _usuario
-       OR u.correo = _correo
-       OR u.telefono = _telefono;
-
+    SELECT COUNT(*) INTO total FROM vst_usuarios u WHERE u.correo = _correo;
     IF total > 0 THEN
-        RAISE EXCEPTION 'El usuario, correo o teléfono ya existen';
+        RAISE EXCEPTION 'El correo electrónico ya esta registrado';
+    END IF;
+
+    SELECT COUNT(*) INTO total FROM vst_usuarios u WHERE u.telefono = _telefono;
+    IF total > 0 THEN
+        RAISE EXCEPTION 'El número de teléfono ya esta registrado';
     END IF;
 
     INSERT INTO usuarios (usuario, nombre, primer_apellido, segundo_apellido, correo, telefono, rol)
@@ -2378,17 +2392,17 @@ BEGIN
     ELSIF _segundo_apellido IS NULL OR TRIM(_segundo_apellido) = '' THEN
         RAISE EXCEPTION 'El segundo apellido es obligatorio';
     ELSIF _correo IS NULL OR TRIM(_correo) = '' THEN
-        RAISE EXCEPTION 'El correo es obligatorio';
+        RAISE EXCEPTION 'El correo electrónico es obligatorio';
     ELSIF _telefono IS NULL OR TRIM(_telefono) = '' THEN
-        RAISE EXCEPTION 'El teléfono es obligatorio';
+        RAISE EXCEPTION 'El número de teléfono es obligatorio';
     ELSIF _contrasena IS NULL OR TRIM(_contrasena) = '' THEN
         RAISE EXCEPTION 'La contraseña es obligatoria';
     END IF;
 
     IF _correo !~ '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$' THEN
-        RAISE EXCEPTION 'El correo no tiene un formato válido';
-    ELSIF _telefono !~ '^[0-9]{10,10}$' THEN
-        RAISE EXCEPTION 'El teléfono no tiene un formato válido';
+        RAISE EXCEPTION 'El correo electrónico no tiene un formato válido';
+    ELSIF _telefono !~ '^[0-9]{10,12}$' THEN
+        RAISE EXCEPTION 'El número de teléfono no tiene un formato válido';
     END IF;
 
     SELECT COUNT(*)
@@ -2400,15 +2414,19 @@ BEGIN
         RAISE EXCEPTION 'El usuario no existe';
     END IF;
 
-    SELECT COUNT(*)
-    INTO total
-    FROM vst_usuarios u
-    WHERE u.usuario = _usuario AND u.id_usuario <> _id_usuario
-       OR u.correo = _correo AND u.id_usuario <> _id_usuario
-       OR u.telefono = _telefono AND u.id_usuario <> _id_usuario;
-
+    SELECT COUNT(*) INTO total FROM vst_usuarios u WHERE u.usuario = _usuario AND u.id_usuario <> _id_usuario;
     IF total > 0 THEN
-        RAISE EXCEPTION 'El usuario, correo o teléfono ya existen';
+        RAISE EXCEPTION 'El usuario ya esta registrado';
+    END IF;
+
+    SELECT COUNT(*) INTO total FROM vst_usuarios u WHERE u.correo = _correo AND u.id_usuario <> _id_usuario;
+    IF total > 0 THEN
+        RAISE EXCEPTION 'El correo electrónico ya esta registrado';
+    END IF;
+
+    SELECT COUNT(*) INTO total FROM vst_usuarios u WHERE u.telefono = _telefono AND u.id_usuario <> _id_usuario;
+    IF total > 0 THEN
+        RAISE EXCEPTION 'El número de teléfono ya esta registrado';
     END IF;
 
     UPDATE
@@ -2597,7 +2615,7 @@ CREATE TABLE IF NOT EXISTS detalles_compra
     subtotal        DECIMAL(10, 2) GENERATED ALWAYS AS (cantidad * precio_unitario) STORED
 );
 
--- Indices de compras
+-- Índices de compras
 
 CREATE INDEX idx_compra_busqueda ON compras (
                                              fecha_compra,
@@ -2608,7 +2626,7 @@ CREATE INDEX idx_compra_busqueda ON compras (
 
 CREATE INDEX idx_compra_activo ON compras (activo);
 
--- Indices de detalles
+-- Índices de detalles
 
 CREATE INDEX idx_detalle_compra ON detalles_compra (id_compra);
 
@@ -2907,7 +2925,7 @@ BEGIN
 END;
 $$;
 
--- Tabla pedidos
+-- Tabla de pedidos
 
 CREATE TABLE IF NOT EXISTS pedidos
 (
@@ -3303,7 +3321,7 @@ CREATE TABLE IF NOT EXISTS actividades
     fecha        TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Indices de actividades
+-- Índices de actividades
 
 CREATE INDEX idx_accion_usuario ON actividades (accion);
 

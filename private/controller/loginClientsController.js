@@ -16,8 +16,7 @@ export const getClientCodeHandler = async (req, res) => {
 
         res.status(200).json(response.rows[0]);
     } catch (error) {
-        if (error.message === "El código no existe") res.status(500).json({ message: "Error al verificar el código, el código no está registrado." });
-        else res.status(500).json({ message: `Error al verificar el código, ${error.message}` });
+        res.status(500).json({ message: `Error al verificar el código, ${error.message}` });
     }
 };
 
@@ -55,7 +54,7 @@ export const loginClientHandler = async (req, res) => {
             res.status(200).json(clientResponse.rows[0]);
         } else res.status(401).json({ message: "Error de autenticación, las credenciales son invalidas." });
     } catch (error) {
-        if (error.message === "El cliente no existe") res.status(500).json({ message: "Error de autenticación, las credenciales son invalidas." });
+        if (error.message === "El cliente no existe") res.status(500).json({ message: "Error de autenticación, las credenciales son invalidas" });
         else res.status(500).json({ message: `Error al iniciar sesión, ${error.message}` });
     }
 };
@@ -76,8 +75,8 @@ export const resetPasswordClientEmailHandler = async (req, res) => {
 
         res.status(200).json({ message: "Correo de restablecimiento enviado, Sigue las instrucciones para restablecer tu contraseña." });
     } catch (error) {
-        if (error.message === "El correo electrónico no existe") res.status(500).json({ message: "Error al restablecer la contraseña, el correo electrónico no está registrado." });
-        else res.status(500).json({ message: `Error al restablecer la contraseña, ${error.message}` });
+        if (error.message === "El correo electrónico no existe") res.status(500).json({ message: "Error al restablecer contraseña, el correo electrónico no está registrado" });
+        else res.status(500).json({ message: `Error al restablecer contraseña, ${error.message}` });
     }
 };
 
@@ -101,7 +100,7 @@ export const resetPasswordClientHandler = async (req, res) => {
         const response = await resetPasswordClient(correo, contrasena);
         res.status(200).json({ message: response.rows[0] });
     } catch (error) {
-        if (error.message === "El cliente no existe") res.status(500).json({ message: "Error al restablecer la contraseña, el correo no está registrado." });
+        if (error.message === "El cliente no existe") res.status(500).json({ message: "Error al restablecer la contraseña, el correo electrónico no está registrado" });
         else res.status(500).json({ message: `Error al restablecer la contraseña, ${error.message}` });
     }
 };
