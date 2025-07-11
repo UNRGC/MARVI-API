@@ -73,10 +73,10 @@ export const resetPasswordClientEmailHandler = async (req, res) => {
             html: htmlContent,
         });
 
-        res.status(200).json({ message: "Correo de restablecimiento enviado, Sigue las instrucciones para restablecer tu contraseña." });
+        res.status(200).json({ message: "Correo enviado, sigue las instrucciones para restablecer tu contraseña" });
     } catch (error) {
-        if (error.message === "El correo electrónico no existe") res.status(500).json({ message: "Error al restablecer contraseña, el correo electrónico no está registrado" });
-        else res.status(500).json({ message: `Error al restablecer contraseña, ${error.message}` });
+        if (error.message === "El correo electrónico no existe") res.status(500).json({ message: "Error al enviar correo, el correo electrónico no está registrado" });
+        else res.status(500).json({ message: `Error al enviar correo, ${error.message}` });
     }
 };
 
