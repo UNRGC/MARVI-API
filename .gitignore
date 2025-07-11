@@ -100,3 +100,6 @@ ehthumbs.db
 
 # Linux
 *.swp
+
+# http requests
+request

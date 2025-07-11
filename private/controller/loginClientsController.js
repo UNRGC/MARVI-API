@@ -1,12 +1,45 @@
 import sendEmail from "../model/emailModel.js";
-import {config} from "dotenv";
-import {getClientByEmail} from "../model/clientsModel.js";
-import {loginClient, resetPasswordClient} from "../model/loginClientsModel.js";
+import { config } from "dotenv";
+import { registerClient } from "../model/clientsModel.js";
+import { getClientCode, getClientEmail, loginClient, resetPasswordClient } from "../model/loginClientsModel.js";
 import moment from "moment-timezone";
 import bcrypt from "bcrypt";
 import fs from "fs";
 
 config();
+
+// Controlador para verificar un código de cliente
+export const getClientCodeHandler = async (req, res) => {
+    try {
+        const { codigo } = req.params;
+        const response = await getClientCode(codigo);
+
+        res.status(200).json(response.rows[0]);
+    } catch (error) {
+        if (error.message === "El código no existe") res.status(500).json({ message: "Error al verificar el código, el código no está registrado." });
+        else res.status(500).json({ message: `Error al verificar el código, ${error.message}` });
+    }
+};
+
+// Controlador para registrar un nuevo cliente de app
+export const registerClientAppHandler = async (req, res) => {
+    try {
+        const { correo } = req.body;
+        const response = await registerClient(req.body);
+        const template = fs.readFileSync("./templates/message_email.html", "utf8");
+        const htmlContent = template.replace("_asunto", "¡Bienvenido a nuestra APP!").replace("_mensaje", "Tu cuenta ha sido creada exitosamente, ahora puedes iniciar sesión con tu correo electrónico y contraseña.");
+
+        await sendEmail({
+            destino: correo,
+            asunto: "Lavandería MARVI- ¡Registro completo!",
+            html: htmlContent,
+        });
+
+        res.status(201).json({ message: response.notice });
+    } catch (error) {
+        res.status(500).json({ message: `Error al registrar usuario, ${error.message}` });
+    }
+};
 
 // Controlador para iniciar sesión de un cliente
 export const loginClientHandler = async (req, res) => {
@@ -20,9 +53,9 @@ export const loginClientHandler = async (req, res) => {
 
         if (await bcrypt.compare(contrasena, response.rows[0].contrasena)) {
             res.status(200).json(clientResponse.rows[0]);
-        } else res.status(401).json({ message: "Error de autenticación, las credenciales son invalidas" });
+        } else res.status(401).json({ message: "Error de autenticación, las credenciales son invalidas." });
     } catch (error) {
-        if (error.message === "El usuario no existe") res.status(500).json({ message: "Error de autenticación, las credenciales son invalidas" });
+        if (error.message === "El cliente no existe") res.status(500).json({ message: "Error de autenticación, las credenciales son invalidas." });
         else res.status(500).json({ message: `Error al iniciar sesión, ${error.message}` });
     }
 };
@@ -31,19 +64,19 @@ export const loginClientHandler = async (req, res) => {
 export const resetPasswordClientEmailHandler = async (req, res) => {
     try {
         const { correo } = req.body;
-        const response = await getClientByEmail(correo);
-        const template = fs.readFileSync("templates/reset_password_client_email.html", "utf8");
+        const response = await getClientEmail(correo);
+        const template = fs.readFileSync("./templates/reset_password_client_email.html", "utf8");
         const htmlContent = template.replace("_link", `https://marvi-api.onrender.com/login/clients/reset/password/${response.rows[0].correo}`);
 
         await sendEmail({
             destino: correo,
-            asunto: "MARVI - Restablece tu contraseña",
+            asunto: "Lavandería MARVI - Restablece tu contraseña",
             html: htmlContent,
         });
 
-        res.status(200).json({ message: "Correo de restablecimiento enviado, revisa tu bandeja de entrada y sigue las instrucciones para restablecer tu contraseña" });
+        res.status(200).json({ message: "Correo de restablecimiento enviado, Sigue las instrucciones para restablecer tu contraseña." });
     } catch (error) {
-        if (error.message === "El usuario no existe") res.status(500).json({ message: "Error al restablecer la contraseña, el correo no está registrado en el sistema" });
+        if (error.message === "El correo electrónico no existe") res.status(500).json({ message: "Error al restablecer la contraseña, el correo electrónico no está registrado." });
         else res.status(500).json({ message: `Error al restablecer la contraseña, ${error.message}` });
     }
 };
@@ -52,7 +85,7 @@ export const resetPasswordClientEmailHandler = async (req, res) => {
 export const resetPasswordClientPageHandler = async (req, res) => {
     try {
         const { correo } = req.params;
-        const template = fs.readFileSync("templates/reset_password_client.html", "utf8");
+        const template = fs.readFileSync("./templates/reset_password_client.html", "utf8");
         const htmlContent = template.replace("_email", correo);
 
         res.status(200).send(htmlContent);
@@ -64,11 +97,11 @@ export const resetPasswordClientPageHandler = async (req, res) => {
 // Controlador para restablecer la contraseña de un cliente
 export const resetPasswordClientHandler = async (req, res) => {
     try {
-        const { correo, nuevaContrasena } = req.body;
-        const response = await resetPasswordClient(correo, nuevaContrasena);
+        const { correo, contrasena } = req.body;
+        const response = await resetPasswordClient(correo, contrasena);
         res.status(200).json({ message: response.rows[0] });
     } catch (error) {
-        if (error.message === "El usuario no existe") res.status(500).json({ message: "Error al restablecer la contraseña, el correo no está registrado en el sistema" });
+        if (error.message === "El cliente no existe") res.status(500).json({ message: "Error al restablecer la contraseña, el correo no está registrado." });
         else res.status(500).json({ message: `Error al restablecer la contraseña, ${error.message}` });
     }
 };

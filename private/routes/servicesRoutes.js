@@ -1,5 +1,5 @@
 import express from "express";
-import { deniedInjections } from "../utils/security.js";
+import { deniedInjections } from "../util/security.js";
 import { registerServiceHandler, updateServiceHandler, deleteServiceHandler, getServiceHandler, getServicesHandler, searchServicesHandler } from "../controller/servicesController.js";
 
 // Crea nueva instancia de un router de express
