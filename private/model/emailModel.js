@@ -24,7 +24,7 @@ const sendEmail = async (data) => {
             attachments: [
                 {
                     filename: "Logo.svg",
-                    path: "public/Logo.svg",
+                    path: "./public/img/Logo.png",
                     cid: "logo",
                 },
             ],

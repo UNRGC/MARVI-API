@@ -1,10 +1,20 @@
 import express from "express";
-import { deniedInjections } from "../utils/security.js";
-import { loginClientHandler, resetPasswordClientEmailHandler, resetPasswordClientPageHandler, resetPasswordClientHandler } from "../controller/loginClientsController.js";
+import {deniedInjections} from "../util/security.js";
+import {
+    loginClientHandler,
+    resetPasswordClientEmailHandler,
+    resetPasswordClientPageHandler,
+    resetPasswordClientHandler,
+    registerClientAppHandler, getClientCodeHandler
+} from "../controller/loginClientsController.js";
 
 // Crea nueva instancia de un router de express
 const router = express.Router();
 
+// Ruta para verificar un código de cliente
+router.get("/clients/:codigo", deniedInjections, getClientCodeHandler)
+// Ruta para registrar un nuevo cliente de app
+router.post("/clients/register", deniedInjections, registerClientAppHandler);
 // Ruta para iniciar sesión
 router.post("/clients", deniedInjections, loginClientHandler);
 // Ruta para enviar un correo de restablecimiento de contraseña

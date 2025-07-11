@@ -5,7 +5,7 @@ import fs from "fs";
 const sendEmailHandler = async (req, res) => {
     try {
         const { destino, asunto, mensaje } = req.body;
-        const template = fs.readFileSync("templates/message_email.html", "utf8");
+        const template = fs.readFileSync("./templates/message_email.html", "utf8");
         const html = template.replace("_asunto", asunto).replace("_mensaje", mensaje);
 
         await sendEmail({

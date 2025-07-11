@@ -54,13 +54,6 @@ export const deleteClient = async (codigo) => {
     return response;
 };
 
-// Función para obtener un cliente por correo electrónico
-export const getClientByEmail = async (correo) => {
-    // Obtener un cliente de la base de datos
-    // Retornar
-    return await client.query("SELECT * FROM consultar_correo_cliente($1);", [correo]);
-};
-
 // Función para obtener un cliente
 export const getClient = async (codigo) => {
     // Obtener un cliente de la base de datos

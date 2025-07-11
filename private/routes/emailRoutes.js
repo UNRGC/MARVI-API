@@ -1,5 +1,5 @@
 import express from "express";
-import { deniedInjections } from "../utils/security.js";
+import { deniedInjections } from "../util/security.js";
 import sendEmailHandler from "../controller/emailController.js";
 
 const emailRouter = express.Router();
