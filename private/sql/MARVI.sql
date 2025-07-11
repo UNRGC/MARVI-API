@@ -781,7 +781,10 @@ WHERE activo = TRUE;
 CREATE OR REPLACE FUNCTION iniciar_sesion_clientes(
     _correo VARCHAR(100)
 )
-    RETURNS TEXT
+    RETURNS TABLE
+            (
+                contrasena TEXT
+            )
     LANGUAGE plpgsql
 AS
 $$
@@ -807,7 +810,10 @@ BEGIN
     FROM vst_clientes c
     WHERE c.correo = _correo;
 
-    RETURN contrasena;
+    RETURN QUERY
+        SELECT c.contrasena
+        FROM vst_clientes c
+        WHERE c.correo = _correo;
 END;
 $$;
 
@@ -908,6 +914,49 @@ BEGIN
         SELECT c.codigo
         FROM vst_clientes c
         WHERE c.codigo = _codigo;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION consultar_cliente_por_correo(
+    _correo VARCHAR(100)
+)
+    RETURNS TABLE
+            (
+                id_cliente       INT,
+                codigo           VARCHAR(10),
+                nombre           VARCHAR(50),
+                primer_apellido  VARCHAR(50),
+                segundo_apellido VARCHAR(50),
+                telefono         VARCHAR(10),
+                correo           VARCHAR(100),
+                contrasena       TEXT,
+                fecha_registro   DATE,
+                foto_src         TEXT,
+                activo           BOOLEAN
+            )
+    LANGUAGE plpgsql
+AS
+$$
+DECLARE
+    total INT;
+BEGIN
+    IF _correo IS NULL OR TRIM(_correo) = '' THEN
+        RAISE EXCEPTION 'El código del cliente es requerido';
+    END IF;
+
+    SELECT COUNT(*)
+    INTO total
+    FROM vst_clientes c
+    WHERE c.correo = _correo;
+
+    IF total = 0 THEN
+        RAISE EXCEPTION 'El cliente no existe';
+    END IF;
+
+    RETURN QUERY
+        SELECT *
+        FROM vst_clientes c
+        WHERE c.correo = _correo;
 END;
 $$;
 

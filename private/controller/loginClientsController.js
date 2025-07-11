@@ -1,6 +1,6 @@
 import sendEmail from "../model/emailModel.js";
 import { config } from "dotenv";
-import { registerClient } from "../model/clientsModel.js";
+import {getClientByEmail, registerClient} from "../model/clientsModel.js";
 import { getClientCode, getClientEmail, loginClient, resetPasswordClient } from "../model/loginClientsModel.js";
 import moment from "moment-timezone";
 import bcrypt from "bcrypt";

@@ -1,4 +1,5 @@
 import {client} from "../config/db.js";
+import bcrypt from "bcrypt";
 
 let noticeMessage = null;
 
@@ -14,8 +15,9 @@ export const registerClient = async (data) => {
         throw new Error("Faltan datos para registrar un cliente");
     }
 
+    const hash = await bcrypt.hash(data.contrasena, 10);
     // Insertar un nuevo cliente en la base de datos
-    const response = await client.query("CALL registrar_cliente($1, $2, $3, $4, $5, $6, $7);", [data.codigo, data.nombre, data.primer_apellido, data.segundo_apellido, data.telefono, data.correo, data.contrasena]);
+    const response = await client.query("CALL registrar_cliente($1, $2, $3, $4, $5, $6, $7);", [data.codigo, data.nombre, data.primer_apellido, data.segundo_apellido, data.telefono, data.correo, hash]);
 
     // Agregar el mensaje de NOTICE a la respuesta
     if (noticeMessage) response.notice = noticeMessage;
@@ -59,6 +61,13 @@ export const getClient = async (codigo) => {
     // Obtener un cliente de la base de datos
     // Retornar
     return await client.query("SELECT * FROM consultar_cliente($1);", [codigo]);
+};
+
+// Función para obtener un cliente por correo electrónico
+export const getClientByEmail = async (correo) => {
+    // Obtener un cliente de la base de datos
+    // Retornar
+    return await client.query("SELECT * FROM consultar_cliente_por_correo($1);", [correo]);
 };
 
 // Función para obtener los clientes filtrados
