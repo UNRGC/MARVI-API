@@ -10,6 +10,7 @@ import clientsRoutes from "./private/routes/clientsRoutes.js";
 import referencesRoutes from "./private/routes/referencesRoutes.js";
 import productsRoutes from "./private/routes/productsRoutes.js";
 import servicesRoutes from "./private/routes/servicesRoutes.js";
+import ordersRoutes from "./private/routes/ordersRoutes.js";
 import emailRoutes from "./private/routes/emailRoutes.js";
 import {config} from "dotenv";
 import {envStart} from "./private/config/env.js";
@@ -60,6 +61,7 @@ app.use("/clients", clientsRoutes);
 app.use("/references", referencesRoutes);
 app.use("/products", productsRoutes);
 app.use("/services", servicesRoutes);
+app.use("/orders", ordersRoutes)
 app.use("/email", emailRoutes);
 
 // Archivos estáticos
@@ -132,12 +134,10 @@ server.listen(PORT, () => {
 });
 
 // Conectar a la base de datos
-connectDB().catch(
-    error => {
-        console.error(error.message);
-        process.exit(1);
-    }
-)
+connectDB().catch(error => {
+    console.error(error.message);
+    process.exit(1);
+})
 
 // Manejar eventos antes de que la API termine
 const shutdown = () => {

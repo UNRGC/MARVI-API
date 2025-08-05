@@ -746,7 +746,6 @@ CREATE TABLE IF NOT EXISTS clientes
     correo           VARCHAR(100) DEFAULT NULL,
     contrasena       TEXT         DEFAULT NULL,
     fecha_registro   DATE         DEFAULT CURRENT_DATE NOT NULL,
-    foto_src         TEXT         DEFAULT NULL,
     activo           BOOLEAN      DEFAULT TRUE         NOT NULL
 );
 
@@ -931,7 +930,6 @@ CREATE OR REPLACE FUNCTION consultar_cliente_por_correo(
                 correo           VARCHAR(100),
                 contrasena       TEXT,
                 fecha_registro   DATE,
-                foto_src         TEXT,
                 activo           BOOLEAN
             )
     LANGUAGE plpgsql
@@ -974,7 +972,6 @@ CREATE OR REPLACE FUNCTION consultar_cliente(
                 correo           VARCHAR(100),
                 contrasena       TEXT,
                 fecha_registro   DATE,
-                foto_src         TEXT,
                 activo           BOOLEAN
             )
     LANGUAGE plpgsql
@@ -3024,7 +3021,7 @@ CREATE INDEX idx_detalle_subtotal_pedido ON detalles_pedido (subtotal);
 -- Vistas de pedidos
 
 CREATE OR REPLACE VIEW vst_pedidos_activos AS
-SELECT id_pedido,
+SELECT p.id_pedido,
        p.fecha_pedido,
        CONCAT(
                c.nombre,
@@ -3041,6 +3038,18 @@ FROM pedidos p
          LEFT JOIN usuarios u ON p.id_usuario = u.id_usuario
          LEFT JOIN estados_pedidos e ON p.estado = e.estado
 WHERE p.activo = TRUE;
+
+CREATE OR REPLACE VIEW vst_pedidos_activos_cliente AS
+SELECT p.id_pedido,
+       p.id_cliente,
+       p.fecha_pedido,
+       STRING_AGG(s.nombre, ', ' ORDER BY s.nombre) AS detalles,
+       p.total
+FROM pedidos p
+         LEFT JOIN detalles_pedido dp ON p.id_pedido = dp.id_pedido
+         LEFT JOIN servicios s ON dp.id_servicio = s.id_servicio
+WHERE p.activo = TRUE
+GROUP BY p.id_pedido, p.id_cliente, p.fecha_pedido, p.total;
 
 CREATE OR REPLACE VIEW vst_pedidos AS
 SELECT p.id_pedido,
@@ -3193,6 +3202,42 @@ BEGIN
            OR p.usuario ILIKE '%' || _busqueda || '%'
            OR p.total::TEXT ILIKE '%' || _busqueda || '%'
         LIMIT _limit OFFSET _offset;
+END;
+$$;
+
+CREATE OR REPLACE FUNCTION buscar_pedidos_cliente(
+    _id_cliente INT,
+    _busqueda TEXT
+)
+    RETURNS TABLE
+            (
+                id_pedido    INT,
+                id_cliente   INT,
+                fecha_pedido DATE,
+                detalles     TEXT,
+                total        DECIMAL(10, 2)
+            )
+    LANGUAGE plpgsql
+AS
+$$
+BEGIN
+    IF _busqueda IS NULL OR TRIM(_busqueda) = '' THEN
+        RETURN QUERY
+            SELECT *
+            FROM vst_pedidos_activos_cliente p
+            WHERE p.id_cliente = _id_cliente;
+    END IF;
+
+    RETURN QUERY
+        SELECT *
+        FROM vst_pedidos_activos_cliente p
+        WHERE p.id_cliente = _id_cliente
+          AND (
+            p.id_pedido::TEXT ILIKE '%' || _busqueda || '%'
+                OR p.fecha_pedido::TEXT ILIKE '%' || _busqueda || '%'
+                OR p.detalles ILIKE '%' || _busqueda || '%'
+                OR p.total::TEXT ILIKE '%' || _busqueda || '%'
+            );
 END;
 $$;
 
@@ -3357,6 +3402,8 @@ BEGIN
         pedidos
     SET estado = _estado
     WHERE id_pedido = _id_pedido;
+
+    RAISE NOTICE 'El pedido % se ha actualizado correctamente', _id_pedido;
 END;
 $$;
 

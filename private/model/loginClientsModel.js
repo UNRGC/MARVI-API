@@ -1,4 +1,5 @@
 import { client } from "../config/db.js";
+import bcrypt from "bcrypt";
 
 let noticeMessage = null;
 
@@ -30,7 +31,8 @@ export const getClientCode = async (codigo) => {
 
 // Función para restablecer la contraseña de un cliente
 export const resetPasswordClient = async (correo, contrasena) => {
+    const hash = await bcrypt.hash(contrasena, 10);
     // Obtener el cliente de la base de datos
     // Retornar
-    return await client.query("SELECT * FROM restablecer_contrasena_cliente($1, $2);", [correo, contrasena]);
+    return await client.query("SELECT * FROM restablecer_contrasena_cliente($1, $2);", [correo, hash]);
 };
