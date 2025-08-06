@@ -3057,13 +3057,14 @@ SELECT p.id_pedido,
        c.nombre::VARCHAR(50) AS cliente,
        p.fecha_pedido,
        p.fecha_entrega,
-       p.estado,
+       ep.nombre             AS estado,
        p.observaciones,
        p.id_usuario,
        p.total,
        p.activo
 FROM pedidos p
          LEFT JOIN clientes c ON p.id_cliente = c.id_cliente
+         LEFT JOIN estados_pedidos ep on p.estado = ep.estado
 WHERE p.activo = TRUE;
 
 CREATE OR REPLACE VIEW vst_detalles_pedido AS
@@ -3088,7 +3089,7 @@ CREATE OR REPLACE FUNCTION consultar_pedido(
                 cliente       VARCHAR(50),
                 fecha_pedido  DATE,
                 fecha_entrega DATE,
-                estado        CHAR(1),
+                estado        VARCHAR(14),
                 observaciones VARCHAR(100),
                 id_usuario    INT,
                 total         DECIMAL(10, 2),

@@ -6,6 +6,26 @@ import moment from "moment-timezone";
 
 config();
 
+// Configuración de la zona horaria y formato de fecha
+const dateFormat = (date) => {
+    const dateTZFechaPedido = moment.utc(date).tz(process.env.TIME_ZONE);
+    return dateTZFechaPedido.format(process.env.DATE_FORMAT);
+}
+
+// Normaliza la fecha de entrada a un formato estándar
+export const normalizeDate = (date) => {
+    const format = ['DD/MM/YYYY', 'MM/DD/YYYY', moment.ISO_8601];
+    let dateMoment = null;
+
+    for (const formato of format) {
+        dateMoment = moment.tz(date, formato, true, process.env.TIME_ZONE);
+        if (dateMoment.isValid()) break;
+    }
+
+    if (!dateMoment || !dateMoment.isValid()) return date;
+    return dateMoment.format('YYYY-MM-DD');
+}
+
 // Controlador para crear un pedido
 export const registerOrderHandler = async (req, res) => {
     try {
@@ -40,6 +60,12 @@ export const deleteOrderHandler = async (req, res) => {
 export const getOrderHandler = async (req, res) => {
     try {
         const response = await getOrder(req.params.id_pedido);
+
+        response.rows.forEach((pedido) => {
+            if (pedido.fecha_pedido) pedido.fecha_pedido = dateFormat(pedido.fecha_pedido);
+            if (pedido.fecha_entrega) pedido.fecha_entrega = dateFormat(pedido.fecha_entrega);
+        })
+
         res.status(200).json(response.rows[0]);
     } catch (error) {
         res.status(500).json({message: `Error al obtener pedido, ${error.message}`});
@@ -62,10 +88,7 @@ export const getOrdersHandler = async (req, res) => {
         const response = await getOrders(req.query);
 
         response.rows.forEach((pedido) => {
-            if (pedido.fecha_pedido) {
-                const dateTZFechaPedido = moment.utc(pedido.fecha_pedido).tz(process.env.TIME_ZONE);
-                pedido.fecha_pedido = dateTZFechaPedido.format(process.env.DATE_FORMAT);
-            }
+            if (pedido.fecha_pedido) pedido.fecha_pedido = dateFormat(pedido.fecha_pedido)
         });
 
         res.status(200).json(response.rows);
@@ -80,10 +103,7 @@ export const searchOrdersHandler = async (req, res) => {
         const response = await searchOrders(req.query);
 
         response.rows.forEach((pedido) => {
-            if (pedido.fecha_pedido) {
-                const dateTZFechaPedido = moment.utc(pedido.fecha_pedido).tz(process.env.TIME_ZONE);
-                pedido.fecha_pedido = dateTZFechaPedido.format(process.env.DATE_FORMAT);
-            }
+            if (pedido.fecha_pedido) pedido.fecha_pedido = dateFormat(pedido.fecha_pedido)
         });
 
         res.status(200).json(response.rows);
@@ -95,13 +115,15 @@ export const searchOrdersHandler = async (req, res) => {
 // Controlador para buscar pedidos de un cliente
 export const searchOrdersByClientHandler = async (req, res) => {
     try {
-        const response = await searchOrdersByClient(req.query);
+        const {id_cliente, busqueda} = req.query;
+        const data = {
+            id_cliente: id_cliente,
+            busqueda: normalizeDate(busqueda)
+        };
+        const response = await searchOrdersByClient(data);
 
         response.rows.forEach((pedido) => {
-            if (pedido.fecha_pedido) {
-                const dateTZFechaPedido = moment.utc(pedido.fecha_pedido).tz(process.env.TIME_ZONE);
-                pedido.fecha_pedido = dateTZFechaPedido.format(process.env.DATE_FORMAT);
-            }
+            if (pedido.fecha_pedido) pedido.fecha_pedido = dateFormat(pedido.fecha_pedido)
         });
 
         res.status(200).json(response.rows);
