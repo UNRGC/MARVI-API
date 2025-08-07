@@ -14,7 +14,7 @@ const dateFormat = (date) => {
 
 // Normaliza la fecha de entrada a un formato estándar
 export const normalizeDate = (date) => {
-    const format = ['DD/MM/YYYY', 'MM/DD/YYYY', moment.ISO_8601];
+    const format = ['DD/MM/YYYY'];
     let dateMoment = null;
 
     for (const formato of format) {
@@ -23,7 +23,7 @@ export const normalizeDate = (date) => {
     }
 
     if (!dateMoment || !dateMoment.isValid()) return date;
-    return dateMoment.format('YYYY-MM-DD');
+    return moment.utc(dateMoment).format('YYYY-MM-DD');
 }
 
 // Controlador para crear un pedido

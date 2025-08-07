@@ -1,4 +1,4 @@
-import {client} from "../config/db.js";
+import { client } from "../config/db.js";
 import bcrypt from "bcrypt";
 
 let noticeMessage = null;
@@ -29,13 +29,13 @@ export const registerClient = async (data) => {
 // Función para actualizar un cliente
 export const updateClient = async (data) => {
     // Validar que se hayan recibido los datos necesarios
-    if (data.length < 9) {
+    if (data.length < 8) {
         throw new Error("Faltan datos para actualizar un cliente");
     }
 
     const hash = await bcrypt.hash(data.contrasena, 10);
     // Insertar un nuevo cliente en la base de datos
-    const response = await client.query("CALL actualizar_cliente($1::INT, $2, $3, $4, $5, $6, $7, $8, $9, $10);", [data.id_cliente, data.codigo, data.nombre, data.primer_apellido, data.segundo_apellido, data.telefono, data.correo, hash, data.foto_src]);
+    const response = await client.query("CALL actualizar_cliente($1::INT, $2, $3, $4, $5, $6, $7, $8);", [data.id_cliente, data.codigo, data.nombre, data.primer_apellido, data.segundo_apellido, data.telefono, data.correo, hash]);
 
     // Agregar el mensaje de NOTICE a la respuesta
     if (noticeMessage) response.notice = noticeMessage;
