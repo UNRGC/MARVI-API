@@ -31,7 +31,7 @@ export const loginHandler = async (req, res) => {
             res.status(200).json(userResponse.rows[0]);
         } else res.status(401).json({ message: "Error de autenticación, las credenciales son invalidas" });
     } catch (error) {
-        if (error.message === "El usuario no existe") res.status(500).json({ message: "Error de autenticación, las credenciales son invalidas" });
+        if (error.message === "El usuario no existe") res.status(500).json({ message: "Error de autenticación, Las credenciales son invalidas" });
         else res.status(500).json({ message: `Error al iniciar sesión, ${error.message}` });
     }
 };
@@ -64,7 +64,7 @@ export const forgotPasswordHandler = async (req, res) => {
 
         res.status(200).json({ message: "Correo de recuperación enviado, revisa tu bandeja de entrada y sigue las instrucciones para restablecer tu contraseña" });
     } catch (error) {
-        if (error.message === "El correo no existe") res.status(500).json({ message: "Error al recuperar la contraseña, el correo no está registrado en el sistema" });
+        if (error.message === "El correo no existe") res.status(500).json({ message: "Error al recuperar la contraseña, El correo no está registrado en el sistema" });
         else res.status(500).json({ message: `Error al recuperar la contraseña, ${error.message}` });
     }
 };
